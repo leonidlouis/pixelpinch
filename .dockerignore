@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.env.local
+Dockerfile
+.github
+.dockerignore
+README.md
+
+# generated assets (we build these inside Docker)
+public/wasm
+public/workers
