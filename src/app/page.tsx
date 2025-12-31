@@ -188,7 +188,7 @@ export default function Home() {
             All processing happens in your browser. Your images never leave your device.
           </p>
           <p className="text-xs">
-            Made by <a href="https://bylouis.dev" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Louis</a>
+            Made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Louis</a>
           </p>
         </div>
       </footer>
