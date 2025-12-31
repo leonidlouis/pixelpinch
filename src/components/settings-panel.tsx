@@ -42,12 +42,13 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                 {/* Quality Slider */}
                 <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                        <label className="text-sm font-medium">Quality</label>
+                        <label htmlFor="quality-slider" className="text-sm font-medium">Quality</label>
                         <span className="text-sm text-muted-foreground">
                             {settings.quality}% • {getQualityLabel(settings.quality)}
                         </span>
                     </div>
                     <Slider
+                        id="quality-slider"
                         value={[settings.quality]}
                         onValueChange={handleQualityChange}
                         min={1}
@@ -64,14 +65,19 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
 
                 {/* Format Selection */}
                 <div className="space-y-3">
-                    <label className="text-sm font-medium">Output Format</label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <span id="format-label" className="text-sm font-medium">Output Format</span>
+                    <div
+                        className="flex flex-col sm:flex-row gap-2"
+                        role="group"
+                        aria-labelledby="format-label"
+                    >
                         <Button
                             variant={settings.format === 'webp' ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => handleFormatChange('webp')}
                             disabled={disabled}
-                            className="w-full"
+                            className="flex-1"
+                            aria-pressed={settings.format === 'webp'}
                         >
                             <span className="mr-2">🌐</span>
                             WebP
@@ -81,7 +87,8 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                             size="sm"
                             onClick={() => handleFormatChange('jpeg')}
                             disabled={disabled}
-                            className="w-full"
+                            className="flex-1"
+                            aria-pressed={settings.format === 'jpeg'}
                         >
                             <span className="mr-2">📷</span>
                             JPEG
@@ -89,8 +96,8 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                     </div>
                     <p className="text-xs text-muted-foreground">
                         {settings.format === 'webp'
-                            ? 'WebP offers best compression with good quality'
-                            : 'JPEG for maximum compatibility'}
+                            ? 'Smaller files, same quality'
+                            : 'Works everywhere'}
                     </p>
                 </div>
             </CardContent>

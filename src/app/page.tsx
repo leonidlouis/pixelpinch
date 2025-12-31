@@ -68,6 +68,24 @@ export default function Home() {
     }
   }, [files, settings, updateFile]);
 
+  // Retry a failed file
+  const handleRetryFile = useCallback(async (id: string) => {
+    const file = files.find(f => f.id === id);
+    if (!file || file.status !== 'error' || !file.file) return;
+
+    // Reset file to pending
+    const resetFile: ImageFile = { ...file, status: 'pending', error: undefined };
+    updateFile(resetFile);
+
+    // Re-compress just this file
+    setIsProcessing(true);
+    try {
+      await compressFiles([resetFile], settings, updateFile);
+    } finally {
+      setIsProcessing(false);
+    }
+  }, [files, settings, updateFile]);
+
   const pendingCount = files.filter(f => f.status === 'pending').length;
   const processingCount = files.filter(f => f.status === 'processing').length;
 
@@ -76,19 +94,19 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border/50">
         <div className="max-w-5xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground">
-                <Zap className="w-6 h-6" />
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground flex-shrink-0">
+                <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight">PixelPinch</h1>
-                <p className="text-xs text-muted-foreground">Batch image compression</p>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold tracking-tight">PixelPinch</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block">Instant batch compression</p>
               </div>
             </div>
 
             {files.length > 0 && (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-shrink-0">
                 <DownloadButton files={files} disabled={isProcessing} />
               </div>
             )}
@@ -97,7 +115,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      <main className="max-w-5xl mx-auto px-4 py-6 sm:py-8 space-y-6">
         {/* Drop Zone */}
         <DropZone
           onFilesAdded={handleFilesAdded}
@@ -106,9 +124,9 @@ export default function Home() {
 
         {/* If we have files, show settings and file list */}
         {files.length > 0 && (
-          <div className="grid gap-6 lg:grid-cols-3">
-            {/* Sidebar: Settings + Actions */}
-            <div className="lg:col-span-1 space-y-4">
+          <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
+            {/* Sidebar: Settings + Actions - appears after files on mobile */}
+            <div className="space-y-4 order-2 lg:order-1">
               <SettingsPanel
                 settings={settings}
                 onSettingsChange={setSettings}
@@ -131,12 +149,13 @@ export default function Home() {
               </Button>
             </div>
 
-            {/* Main: File List */}
-            <div className="lg:col-span-2">
+            {/* Main: File List - appears first on mobile */}
+            <div className="order-1 lg:order-2">
               <FileList
                 files={files}
                 onRemoveFile={handleRemoveFile}
                 onClearAll={handleClearAll}
+                onRetryFile={handleRetryFile}
               />
             </div>
           </div>
@@ -149,7 +168,7 @@ export default function Home() {
               Drop some images above to get started
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
-              {['50+ images', 'WebP & JPEG', 'HEIC support', 'No upload'].map((feature) => (
+              {['Lightning fast', 'Batch 50+', '100% private', 'WebP & JPEG'].map((feature) => (
                 <span
                   key={feature}
                   className="px-3 py-1 rounded-full bg-muted text-xs font-medium"
@@ -164,9 +183,12 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-auto">
-        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
+        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground space-y-1">
           <p>
             All processing happens in your browser. Your images never leave your device.
+          </p>
+          <p className="text-xs">
+            Made by <a href="https://bylouis.dev" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Louis</a>
           </p>
         </div>
       </footer>

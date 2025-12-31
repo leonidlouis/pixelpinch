@@ -71,25 +71,27 @@ export function DownloadButton({ files, disabled }: DownloadButtonProps) {
 
     return (
         <Button
-            size="lg"
+            size="default"
             onClick={handleDownload}
             disabled={disabled || !hasFiles || isZipping}
-            className="w-full gap-2"
+            className="gap-2 text-sm sm:text-base"
         >
             {isZipping ? (
                 <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Creating ZIP...
+                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
+                    <span className="hidden sm:inline">Creating ZIP...</span>
+                    <span className="sm:hidden">ZIP...</span>
                 </>
             ) : completedFiles.length > 1 ? (
                 <>
-                    <Archive className="w-5 h-5" />
-                    Download All ({completedFiles.length} files)
+                    <Archive className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span className="hidden sm:inline">Download All ({completedFiles.length})</span>
+                    <span className="sm:hidden">All ({completedFiles.length})</span>
                 </>
             ) : (
                 <>
-                    <Download className="w-5 h-5" />
-                    {hasFiles ? 'Download' : 'No files ready'}
+                    <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <span>{hasFiles ? 'Download' : 'No files'}</span>
                 </>
             )}
         </Button>

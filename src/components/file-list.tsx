@@ -12,7 +12,9 @@ import {
     AlertCircle,
     Loader2,
     Trash2,
-    Clock
+    Clock,
+    Download,
+    RotateCcw
 } from 'lucide-react';
 import { formatBytes } from '@/lib/compression';
 import type { ImageFile } from '@/types/compression';
@@ -21,9 +23,10 @@ interface FileListProps {
     files: ImageFile[];
     onRemoveFile: (id: string) => void;
     onClearAll: () => void;
+    onRetryFile?: (id: string) => void;
 }
 
-export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
+export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileListProps) {
 
     // Memoize expensive calculations to avoid recalculating on every render
     const stats = useMemo(() => {
@@ -46,6 +49,13 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
         };
     }, [files]);
 
+    // Confirm before clearing all files
+    const handleClearAll = useCallback(() => {
+        if (files.length > 0 && window.confirm('Remove all files? This cannot be undone.')) {
+            onClearAll();
+        }
+    }, [files.length, onClearAll]);
+
     const { totalOriginal, totalCompressed, completedCount, processingCount, errorCount, overallProgress, totalSaved } = stats;
 
     if (files.length === 0) {
@@ -63,7 +73,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={onClearAll}
+                        onClick={handleClearAll}
                         className="text-muted-foreground hover:text-destructive"
                     >
                         <Trash2 className="w-4 h-4 mr-1" />
@@ -110,6 +120,7 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
                             key={file.id}
                             file={file}
                             onRemove={() => onRemoveFile(file.id)}
+                            onRetry={onRetryFile ? () => onRetryFile(file.id) : undefined}
                         />
                     ))}
                 </div>
@@ -121,12 +132,26 @@ export function FileList({ files, onRemoveFile, onClearAll }: FileListProps) {
 interface FileItemProps {
     file: ImageFile;
     onRemove: () => void;
+    onRetry?: () => void;
+}
+
+// Download individual file
+function downloadFile(file: ImageFile) {
+    if (!file.compressedBlob) return;
+    const url = URL.createObjectURL(file.compressedBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 // Memoized FileItem to prevent re-renders when other files change
-const FileItem = React.memo(function FileItem({ file, onRemove }: FileItemProps) {
+const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileItemProps) {
     return (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors group">
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted active:bg-muted/80 transition-colors group min-h-[56px]">
             {/* Status Icon */}
             <div className="flex-shrink-0">
                 {file.status === 'pending' && (
@@ -181,15 +206,45 @@ const FileItem = React.memo(function FileItem({ file, onRemove }: FileItemProps)
                 )}
             </div>
 
-            {/* Remove Button */}
-            <Button
-                variant="ghost"
-                size="icon"
-                onClick={onRemove}
-                className="opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 h-8 w-8"
-            >
-                <Trash2 className="w-4 h-4" />
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-1 flex-shrink-0">
+                {/* Download button for completed files */}
+                {file.status === 'done' && file.compressedBlob && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => downloadFile(file)}
+                        aria-label={`Download ${file.name}`}
+                        className="h-9 w-9 opacity-60 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+                    >
+                        <Download className="w-4 h-4" />
+                    </Button>
+                )}
+
+                {/* Retry button for failed files */}
+                {file.status === 'error' && onRetry && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={onRetry}
+                        aria-label={`Retry ${file.name}`}
+                        className="h-9 w-9"
+                    >
+                        <RotateCcw className="w-4 h-4" />
+                    </Button>
+                )}
+
+                {/* Remove Button - Always visible on touch, fade on desktop hover */}
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onRemove}
+                    aria-label={`Remove ${file.name}`}
+                    className="h-9 w-9 opacity-60 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity touch-manipulation"
+                >
+                    <Trash2 className="w-4 h-4" />
+                </Button>
+            </div>
         </div>
     );
 });
