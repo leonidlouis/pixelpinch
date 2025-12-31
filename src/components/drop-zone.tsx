@@ -66,7 +66,7 @@ export function DropZone({ onFilesAdded, disabled }: DropZoneProps) {
             onDrop={handleDrop}
             className={`
         relative flex flex-col items-center justify-center
-        min-h-[280px] rounded-2xl border-2 border-dashed
+        min-h-[180px] sm:min-h-[240px] md:min-h-[280px] rounded-2xl border-2 border-dashed
         transition-all duration-300 ease-out cursor-pointer
         ${isDragActive
                     ? 'border-primary bg-primary/5 scale-[1.02]'
@@ -91,27 +91,27 @@ export function DropZone({ onFilesAdded, disabled }: DropZoneProps) {
             />
 
             <div className={`
-        flex flex-col items-center gap-4 p-8 text-center
+        flex flex-col items-center gap-3 sm:gap-4 p-6 sm:p-8 text-center
         transition-transform duration-300
         ${isDragActive ? 'scale-110' : ''}
       `}>
                 <div className={`
-          p-4 rounded-full transition-colors duration-300
+          p-3 sm:p-4 rounded-full transition-colors duration-300
           ${isDragActive ? 'bg-primary text-primary-foreground' : 'bg-muted'}
         `}>
                     {isDragActive ? (
-                        <ImageIcon className="w-10 h-10" />
+                        <ImageIcon className="w-8 h-8 sm:w-10 sm:h-10" />
                     ) : (
-                        <Upload className="w-10 h-10" />
+                        <Upload className="w-8 h-8 sm:w-10 sm:h-10" />
                     )}
                 </div>
 
                 <div>
-                    <h3 className="text-lg font-semibold mb-1">
+                    <h3 className="text-base sm:text-lg font-semibold mb-1">
                         {isDragActive ? 'Drop images here' : 'Drag & drop images'}
                     </h3>
                     <p className="text-sm text-muted-foreground">
-                        or click to browse files
+                        or tap to browse files
                     </p>
                 </div>
 
