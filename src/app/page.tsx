@@ -183,13 +183,23 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-auto">
-        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground space-y-1">
+        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground space-y-3">
           <p>
             All processing happens in your browser. Your images never leave your device.
           </p>
-          <p className="text-xs">
-            Made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Louis</a>
-          </p>
+          <div className="flex items-center justify-center gap-3 text-xs">
+            <span>Made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Louis</a></span>
+            <span className="text-border">•</span>
+            <a
+              href="https://buymeacoffee.com/louvre_"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFDD00] text-[#000000] font-medium hover:bg-[#FFDD00]/90 transition-colors"
+            >
+              <span>☕</span>
+              <span>Support</span>
+            </a>
+          </div>
         </div>
       </footer>
     </div>
