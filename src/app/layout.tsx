@@ -65,7 +65,7 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
 
   // Other
-  authors: [{ name: 'Louis', url: 'https://bylouis.dev' }],
+  authors: [{ name: 'Louis', url: 'https://bylouis.io' }],
   creator: 'Louis',
   publisher: 'Louis',
 };
