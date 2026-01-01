@@ -361,7 +361,7 @@ export default function Home() {
           <p>
             processing happens locally on-device, zero uploads.
           </p>
-          <div className="flex items-center justify-center gap-3 text-xs">
+          <div className="flex items-center justify-center gap-2 text-xs">
             <span>made <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
             <span className="text-border">•</span>
             <span>any issues? <a href="mailto:louisleonid325@gmail.com?subject=[PIXELPINCH ISSUE] X is not working" className="underline hover:text-foreground transition-colors">mail me</a></span>
