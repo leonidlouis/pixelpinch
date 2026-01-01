@@ -184,7 +184,7 @@ export default function Home() {
   const showRecompress = files.length > 0 && pendingCount === 0 && hasUnsavedChanges;
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-muted/20 flex flex-col overflow-x-hidden">
+    <div className="min-h-[100svh] bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border/50 supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-5xl mx-auto px-4 py-4">
