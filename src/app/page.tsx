@@ -256,7 +256,7 @@ export default function Home() {
             </div>
 
             {/* Mobile Sticky Compress Bar */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t z-40 lg:hidden safe-area-bottom shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+            <div className="fixed bottom-0 left-0 right-0 p-6 bg-background/95 border-t z-40 lg:hidden safe-area-bottom shadow-2xl animate-in slide-in-from-bottom-full duration-300">
               <div className="max-w-md mx-auto">
                 <Button
                   size="lg"
@@ -296,7 +296,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 lg:mt-auto pb-15 lg:pb-0">
+      <footer className="border-t border-border/50 lg:mt-auto pb-24 lg:pb-0">
         <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground space-y-3">
           <p>
             All processing happens in your browser. Your images never leave your device.
