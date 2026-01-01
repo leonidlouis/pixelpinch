@@ -97,6 +97,10 @@ function SupportDropdown() {
   );
 }
 
+import { ImagePreview } from '@/components/image-preview';
+
+// ... existing imports ...
+
 export default function Home() {
   const [files, setFiles] = useState<ImageFile[]>([]);
   const [settings, setSettings] = useState<CompressionSettings>(() => ({
@@ -106,6 +110,7 @@ export default function Home() {
   }));
   const [lastRunSettings, setLastRunSettings] = useState<CompressionSettings | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [previewFileId, setPreviewFileId] = useState<string | null>(null);
 
   // Check if settings changed since last run
   const hasUnsavedChanges = lastRunSettings && (
@@ -300,6 +305,13 @@ export default function Home() {
                 onRemoveFile={handleRemoveFile}
                 onClearAll={handleClearAll}
                 onRetryFile={handleRetryFile}
+                onPreview={(file) => {
+                  setPreviewFileId(file.id);
+                  sendEvent('preview_opened', {
+                    file_name: file.name,
+                    file_size: file.originalSize
+                  });
+                }}
               />
             </div>
 
@@ -356,6 +368,13 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      <ImagePreview
+        key={previewFileId}
+        file={files.find(f => f.id === previewFileId) || null}
+        isOpen={!!previewFileId}
+        onClose={() => setPreviewFileId(null)}
+      />
     </div>
   );
 }
