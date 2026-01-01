@@ -204,7 +204,6 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                                 </p>
                                 <p>
                                     <span className="font-semibold">Your device:</span> {maxWorkers} max workers available
-                                    {isMobile && ' (mobile detected)'}
                                 </p>
                                 <p>
                                     <span className="font-semibold">Default:</span> {defaultWorkers} workers
