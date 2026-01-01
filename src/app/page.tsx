@@ -6,7 +6,7 @@ import { SettingsPanel } from '@/components/settings-panel';
 import { FileList } from '@/components/file-list';
 import { DownloadButton } from '@/components/download-button';
 import { Button } from '@/components/ui/button';
-import { Play, Zap, CoffeeIcon, RefreshCw } from 'lucide-react';
+import { Play, Zap, CoffeeIcon, RefreshCw, Loader2 } from 'lucide-react';
 import {
   generateId,
   compressFiles,
@@ -237,7 +237,7 @@ export default function Home() {
                 disabled={(!pendingCount && !showRecompress) || isProcessing}
                 className="w-full gap-2 hidden lg:flex shadow-lg shadow-primary/10"
               >
-                {showRecompress ? <RefreshCw className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : showRecompress ? <RefreshCw className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                 {isProcessing
                   ? 'Processing...'
                   : showRecompress
@@ -267,7 +267,7 @@ export default function Home() {
                   disabled={(!pendingCount && !showRecompress) || isProcessing}
                   className="w-full gap-2 shadow-xl shadow-primary/20"
                 >
-                  {showRecompress ? <RefreshCw className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                  {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : showRecompress ? <RefreshCw className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                   {isProcessing
                     ? 'Processing...'
                     : showRecompress
