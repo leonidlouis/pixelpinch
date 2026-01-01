@@ -119,7 +119,17 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
   }
+}
+
+/* iOS safe area + GPU layer isolation for fixed elements */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
 }
