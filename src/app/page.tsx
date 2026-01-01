@@ -45,7 +45,7 @@ function SupportDropdown() {
             sendEvent('support_menu_opened');
           }
         }}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium transition-all text-[11px] uppercase tracking-wider"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium transition-all text-[11px] tracking-wider"
       >
         <CoffeeIcon className="w-3.5 h-3.5 fill-current" />
         buy me a coffee
@@ -362,7 +362,9 @@ export default function Home() {
             All processing happens in your browser. Your images never leave your device.
           </p>
           <div className="flex items-center justify-center gap-3 text-xs">
-            <span>Made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>Louis</a></span>
+            <span>made <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
+            <span className="text-border">•</span>
+            <span>any issues? <a href="mailto:louisleonid325@gmail.com?subject=[PIXELPINCH ISSUE] X is not working" className="underline hover:text-foreground transition-colors">mail me</a></span>
             <span className="text-border">•</span>
             <SupportDropdown />
           </div>
