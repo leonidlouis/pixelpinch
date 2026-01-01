@@ -5,7 +5,14 @@ type EventName =
     | 'compression_completed'
     | 'compression_failed'
     | 'batch_completed'
-    | 'files_added';
+    | 'files_added'
+    | 'download_clicked'
+    | 'support_clicked'
+    | 'error_occurred'
+    | 'settings_changed'
+    | 'help_clicked'
+    | 'clear_all_clicked'
+    | 'support_menu_opened';
 
 type EventProperties = Record<string, any>;
 

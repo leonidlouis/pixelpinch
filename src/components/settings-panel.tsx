@@ -6,6 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import { Settings2, Info, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import type { CompressionSettings, OutputFormat } from '@/types/compression';
 import { getMaxParallelWorkers, getDefaultParallelWorkers, isMobileDevice } from '@/lib/worker-pool';
+import { sendEvent } from '@/lib/analytics';
 
 interface SettingsPanelProps {
     settings: CompressionSettings;
@@ -25,12 +26,21 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
         onSettingsChange({ ...settings, quality: value[0] });
     };
 
+    const handleQualityCommit = (value: number[]) => {
+        sendEvent('settings_changed', { setting: 'quality', value: value[0] });
+    };
+
     const handleFormatChange = (format: OutputFormat) => {
         onSettingsChange({ ...settings, format });
+        sendEvent('settings_changed', { setting: 'format', value: format });
     };
 
     const handleWorkersChange = (value: number[]) => {
         onSettingsChange({ ...settings, parallelWorkers: value[0] });
+    };
+
+    const handleWorkersCommit = (value: number[]) => {
+        sendEvent('settings_changed', { setting: 'workers', value: value[0] });
     };
 
     // Quality level labels
@@ -63,6 +73,7 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                         id="quality-slider"
                         value={[settings.quality]}
                         onValueChange={handleQualityChange}
+                        onValueCommit={handleQualityCommit}
                         min={1}
                         max={100}
                         step={1}
@@ -78,7 +89,13 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                     <div className="pt-2">
                         <button
                             type="button"
-                            onClick={() => setShowQualityGuide(!showQualityGuide)}
+                            onClick={() => {
+                                const newValue = !showQualityGuide;
+                                setShowQualityGuide(newValue);
+                                if (newValue) {
+                                    sendEvent('help_clicked', { topic: 'quality_guide' });
+                                }
+                            }}
                             className="flex items-center gap-1.5 text-xs text-primary font-medium hover:underline focus:outline-none"
                         >
                             <Info className="w-3 h-3" />
@@ -169,6 +186,7 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                         id="workers-slider"
                         value={[settings.parallelWorkers]}
                         onValueChange={handleWorkersChange}
+                        onValueCommit={handleWorkersCommit}
                         min={1}
                         max={maxWorkers}
                         step={1}
@@ -184,7 +202,13 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                     <div className="pt-2">
                         <button
                             type="button"
-                            onClick={() => setShowWorkersGuide(!showWorkersGuide)}
+                            onClick={() => {
+                                const newValue = !showWorkersGuide;
+                                setShowWorkersGuide(newValue);
+                                if (newValue) {
+                                    sendEvent('help_clicked', { topic: 'workers_guide' });
+                                }
+                            }}
                             className="flex items-center gap-1.5 text-xs text-primary font-medium hover:underline focus:outline-none"
                         >
                             <Info className="w-3 h-3" />

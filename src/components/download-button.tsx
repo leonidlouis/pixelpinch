@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2, Archive } from 'lucide-react';
+import { sendEvent } from '@/lib/analytics';
 import type { ImageFile } from '@/types/compression';
 
 interface DownloadButtonProps {
@@ -33,6 +34,7 @@ export function DownloadButton({ files, disabled }: DownloadButtonProps) {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            sendEvent('download_clicked', { type: 'single', count: 1 });
             return;
         }
 
@@ -62,6 +64,7 @@ export function DownloadButton({ files, disabled }: DownloadButtonProps) {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            sendEvent('download_clicked', { type: 'zip', count: completedFiles.length });
         } catch (error) {
             console.error('Failed to create ZIP:', error);
         } finally {
