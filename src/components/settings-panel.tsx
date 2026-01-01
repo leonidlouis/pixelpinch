@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Settings2, Info, ChevronDown, ChevronUp, Cpu, AlertTriangle } from 'lucide-react';
+import { Settings2, Info, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
 import type { CompressionSettings, OutputFormat } from '@/types/compression';
 import { getMaxParallelWorkers, getDefaultParallelWorkers, isMobileDevice } from '@/lib/worker-pool';
 
@@ -103,6 +103,8 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                     </div>
                 </div>
 
+                <div className="h-px bg-border/50" />
+
                 {/* Format Selection */}
                 <div className="space-y-3">
                     <span id="format-label" className="text-sm font-medium">Output Format</span>
@@ -151,11 +153,12 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                     </p>
                 </div>
 
+                <div className="h-px bg-border/50" />
+
                 {/* Parallel Workers Slider */}
                 <div className="space-y-3">
                     <div className="flex justify-between items-center">
-                        <label htmlFor="workers-slider" className="text-sm font-medium flex items-center gap-1.5">
-                            <Cpu className="w-3.5 h-3.5" />
+                        <label htmlFor="workers-slider" className="text-sm font-medium">
                             Parallel Workers
                         </label>
                         <span className="text-sm text-muted-foreground">
