@@ -356,10 +356,10 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 lg:mt-auto pb-24 lg:pb-0">
-        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground space-y-3">
+      <footer className={`border-t border-border/50 lg:mt-auto lg:pb-0 ${files.length > 0 ? 'pb-24' : 'pb-4'}`}>
+        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-muted-foreground space-y-3">
           <p>
-            All processing happens in your browser. Your images never leave your device.
+            processing happens locally on-device, zero uploads.
           </p>
           <div className="flex items-center justify-center gap-3 text-xs">
             <span>made <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
