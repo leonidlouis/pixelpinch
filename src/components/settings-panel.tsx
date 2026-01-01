@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
-import { Button } from '@/components/ui/button';
-import { Settings2, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { Settings2, Info, ChevronDown, ChevronUp, Cpu, AlertTriangle } from 'lucide-react';
 import type { CompressionSettings, OutputFormat } from '@/types/compression';
+import { getMaxParallelWorkers, getDefaultParallelWorkers, isMobileDevice } from '@/lib/worker-pool';
 
 interface SettingsPanelProps {
     settings: CompressionSettings;
@@ -14,7 +14,12 @@ interface SettingsPanelProps {
 }
 
 export function SettingsPanel({ settings, onSettingsChange, disabled }: SettingsPanelProps) {
-    const [showGuide, setShowGuide] = useState(false);
+    const [showQualityGuide, setShowQualityGuide] = useState(false);
+    const [showWorkersGuide, setShowWorkersGuide] = useState(false);
+
+    const maxWorkers = getMaxParallelWorkers();
+    const defaultWorkers = getDefaultParallelWorkers();
+    const isMobile = isMobileDevice();
 
     const handleQualityChange = (value: number[]) => {
         onSettingsChange({ ...settings, quality: value[0] });
@@ -22,6 +27,10 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
 
     const handleFormatChange = (format: OutputFormat) => {
         onSettingsChange({ ...settings, format });
+    };
+
+    const handleWorkersChange = (value: number[]) => {
+        onSettingsChange({ ...settings, parallelWorkers: value[0] });
     };
 
     // Quality level labels
@@ -69,19 +78,19 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                     <div className="pt-2">
                         <button
                             type="button"
-                            onClick={() => setShowGuide(!showGuide)}
+                            onClick={() => setShowQualityGuide(!showQualityGuide)}
                             className="flex items-center gap-1.5 text-xs text-primary font-medium hover:underline focus:outline-none"
                         >
                             <Info className="w-3 h-3" />
                             <span>How to choose?</span>
-                            {showGuide ? (
+                            {showQualityGuide ? (
                                 <ChevronUp className="w-3 h-3" />
                             ) : (
                                 <ChevronDown className="w-3 h-3" />
                             )}
                         </button>
 
-                        {showGuide && (
+                        {showQualityGuide && (
                             <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border/50 text-xs space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="space-y-1">
                                     <p><span className="font-semibold text-foreground">90-100%:</span> Virtually lossless. Best for photography.</p>
@@ -141,7 +150,75 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                             : 'Works everywhere'}
                     </p>
                 </div>
+
+                {/* Parallel Workers Slider */}
+                <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                        <label htmlFor="workers-slider" className="text-sm font-medium flex items-center gap-1.5">
+                            <Cpu className="w-3.5 h-3.5" />
+                            Parallel Workers
+                        </label>
+                        <span className="text-sm text-muted-foreground">
+                            {settings.parallelWorkers} {settings.parallelWorkers === 1 ? 'thread' : 'threads'}
+                        </span>
+                    </div>
+                    <Slider
+                        id="workers-slider"
+                        value={[settings.parallelWorkers]}
+                        onValueChange={handleWorkersChange}
+                        min={1}
+                        max={maxWorkers}
+                        step={1}
+                        disabled={disabled}
+                        className="w-full"
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Less memory</span>
+                        <span>Faster processing</span>
+                    </div>
+
+                    {/* Workers Guide Toggle */}
+                    <div className="pt-2">
+                        <button
+                            type="button"
+                            onClick={() => setShowWorkersGuide(!showWorkersGuide)}
+                            className="flex items-center gap-1.5 text-xs text-primary font-medium hover:underline focus:outline-none"
+                        >
+                            <Info className="w-3 h-3" />
+                            <span>What is this?</span>
+                            {showWorkersGuide ? (
+                                <ChevronUp className="w-3 h-3" />
+                            ) : (
+                                <ChevronDown className="w-3 h-3" />
+                            )}
+                        </button>
+
+                        {showWorkersGuide && (
+                            <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border/50 text-xs space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                                <p>
+                                    This controls how many images are compressed simultaneously.
+                                    More workers = faster, but uses more memory.
+                                </p>
+                                <p>
+                                    <span className="font-semibold">Your device:</span> {maxWorkers} max workers available
+                                    {isMobile && ' (mobile detected)'}
+                                </p>
+                                <p>
+                                    <span className="font-semibold">Default:</span> {defaultWorkers} workers
+                                </p>
+                                <div className="flex items-start gap-2 mt-2 p-2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
+                                    <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
+                                    <p>
+                                        If the page reloads unexpectedly when compressing many images,
+                                        try reducing this to 1 or 2.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </CardContent>
         </Card>
     );
 }
+

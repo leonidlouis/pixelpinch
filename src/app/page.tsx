@@ -12,6 +12,7 @@ import {
   compressFiles,
   isValidImageFile
 } from '@/lib/compression';
+import { getDefaultParallelWorkers } from '@/lib/worker-pool';
 import type { ImageFile, CompressionSettings } from '@/types/compression';
 
 function SupportDropdown() {
@@ -86,17 +87,19 @@ function SupportDropdown() {
 
 export default function Home() {
   const [files, setFiles] = useState<ImageFile[]>([]);
-  const [settings, setSettings] = useState<CompressionSettings>({
+  const [settings, setSettings] = useState<CompressionSettings>(() => ({
     quality: 80,
     format: 'jpeg',
-  });
+    parallelWorkers: getDefaultParallelWorkers(),
+  }));
   const [lastRunSettings, setLastRunSettings] = useState<CompressionSettings | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Check if settings changed since last run
   const hasUnsavedChanges = lastRunSettings && (
     lastRunSettings.quality !== settings.quality ||
-    lastRunSettings.format !== settings.format
+    lastRunSettings.format !== settings.format ||
+    lastRunSettings.parallelWorkers !== settings.parallelWorkers
   );
 
   // Add new files

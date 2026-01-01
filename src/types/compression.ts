@@ -7,6 +7,7 @@ export type CompressionStatus = 'pending' | 'processing' | 'done' | 'error';
 export interface CompressionSettings {
   quality: number; // 1-100
   format: OutputFormat;
+  parallelWorkers: number; // 1 to hardwareConcurrency-1
 }
 
 export interface ImageFile {

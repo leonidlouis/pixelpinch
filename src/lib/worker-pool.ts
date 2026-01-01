@@ -8,7 +8,7 @@ interface QueuedTask {
 }
 
 // Detect mobile devices for conservative worker limits
-function isMobileDevice(): boolean {
+export function isMobileDevice(): boolean {
     if (typeof navigator === 'undefined') return false;
 
     // Check for touch capability + small screen (rules out touch laptops)
@@ -21,6 +21,21 @@ function isMobileDevice(): boolean {
     );
 
     return mobileUA || (hasTouch && isSmallScreen);
+}
+
+// Get the maximum allowed workers for this device
+export function getMaxParallelWorkers(): number {
+    if (typeof navigator === 'undefined') return 4;
+    return Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
+}
+
+// Get the recommended default workers based on device type
+export function getDefaultParallelWorkers(): number {
+    const max = getMaxParallelWorkers();
+    if (isMobileDevice()) {
+        return Math.min(3, max);
+    }
+    return max;
 }
 
 
