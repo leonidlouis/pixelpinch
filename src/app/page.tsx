@@ -38,7 +38,13 @@ function SupportDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          const newState = !isOpen;
+          setIsOpen(newState);
+          if (newState) {
+            sendEvent('support_menu_opened');
+          }
+        }}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium transition-all text-[11px] uppercase tracking-wider"
       >
         <CoffeeIcon className="w-3.5 h-3.5 fill-current" />
@@ -65,7 +71,11 @@ function SupportDropdown() {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  setIsOpen(false);
+                  const platform = item.label.includes('Buymeacoffee') ? 'buymeacoffee' : item.label.includes('Saweria') ? 'saweria' : 'other';
+                  sendEvent('support_clicked', { platform });
+                }}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-all group"
               >
                 <span className="text-xl flex-shrink-0 transition-transform group-hover:scale-110 group-active:scale-95">
@@ -189,6 +199,12 @@ export default function Home() {
         settings: settings
       });
 
+    } catch (error) {
+      console.error('Compression batch failed', error);
+      sendEvent('error_occurred', {
+        context: 'batch_compression',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
     } finally {
       setIsProcessing(false);
     }
@@ -334,7 +350,7 @@ export default function Home() {
             All processing happens in your browser. Your images never leave your device.
           </p>
           <div className="flex items-center justify-center gap-3 text-xs">
-            <span>Made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Louis</a></span>
+            <span>Made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>Louis</a></span>
             <span className="text-border">•</span>
             <SupportDropdown />
           </div>

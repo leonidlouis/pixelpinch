@@ -17,6 +17,7 @@ import {
     RotateCcw
 } from 'lucide-react';
 import { formatBytes } from '@/lib/compression';
+import { sendEvent } from '@/lib/analytics';
 import type { ImageFile } from '@/types/compression';
 
 interface FileListProps {
@@ -66,6 +67,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
     // Confirm before clearing all files
     const handleClearAll = useCallback(() => {
         if (files.length > 0 && window.confirm('Remove all files? This cannot be undone.')) {
+            sendEvent('clear_all_clicked', { file_count: files.length });
             onClearAll();
         }
     }, [files.length, onClearAll]);
