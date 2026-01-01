@@ -239,7 +239,7 @@ export default function Home() {
               >
                 {showRecompress ? <RefreshCw className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                 {isProcessing
-                  ? `Processing (${processingCount})...`
+                  ? 'Processing...'
                   : showRecompress
                     ? 'Re-compress'
                     : pendingCount > 0
@@ -269,7 +269,7 @@ export default function Home() {
                 >
                   {showRecompress ? <RefreshCw className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                   {isProcessing
-                    ? `Processing (${processingCount})...`
+                    ? 'Processing...'
                     : showRecompress
                       ? 'Re-compress'
                       : pendingCount > 0
