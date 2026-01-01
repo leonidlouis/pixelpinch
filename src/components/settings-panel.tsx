@@ -219,8 +219,8 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                                         <p>
                                             Using lots of parallel workers uses more RAM, which may cause the page to be forcibly reloaded.
                                         </p>
-                                        <p className="font-medium">
-                                            If this happens, try reducing this to 1 or 2.
+                                        <p>
+                                            If this happens, try reducing this to 1.
                                         </p>
                                     </div>
                                 </div>
