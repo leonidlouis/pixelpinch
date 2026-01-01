@@ -212,8 +212,14 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                                 <div className="flex items-start gap-2 mt-2 p-2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
                                     <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                     <p>
-                                        If the page reloads unexpectedly when compressing many images,
-                                        try reducing this to 1 or 2.
+                                        Certain operating systems like iOS cap the usage of RAM for a webpage.
+                                        If an &quot;overuse&quot; of RAM is detected, iOS will kill that webpage.
+                                    </p>
+                                    <p>
+                                        Using lots of parallel workers uses more RAM, which may cause the page to be forcibly reloaded.
+                                    </p>
+                                    <p className="font-medium">
+                                        If this happens, try reducing this to 1 or 2.
                                     </p>
                                 </div>
                             </div>
