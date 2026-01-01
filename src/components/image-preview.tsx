@@ -103,7 +103,7 @@ export function ImagePreview({ file, isOpen, onClose }: ImagePreviewProps) {
                             <FileImage className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                         </div>
                         <div className="min-w-0">
-                            <h3 className="font-semibold text-base sm:text-lg leading-tight truncate">{file.name}</h3>
+                            <h3 className="font-semibold text-sm sm:text-base leading-tight truncate">{file.name}</h3>
                             <p className="text-2xs sm:text-xs text-muted-foreground">preview mode</p>
                         </div>
                     </div>
@@ -177,7 +177,7 @@ export function ImagePreview({ file, isOpen, onClose }: ImagePreviewProps) {
                     <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-6 text-sm">
                         <div className={cn("transition-opacity flex items-center sm:block gap-2 sm:gap-0", showCompressed && isCompressedAvailable ? "opacity-50" : "opacity-100 font-medium")}>
                             <p className="text-muted-foreground text-2xs sm:text-xs uppercase tracking-widest sm:mb-0.5">Orig<span className="hidden sm:inline">inal</span><span className="sm:hidden">:</span></p>
-                            <p className="text-sm sm:text-base font-medium">{formatBytes(originalSize)}</p>
+                            <p className="text-xs sm:text-sm font-medium">{formatBytes(originalSize)}</p>
                         </div>
 
                         <ArrowLeftRight className="w-4 h-4 text-muted-foreground/50 hidden sm:block" />
@@ -185,7 +185,7 @@ export function ImagePreview({ file, isOpen, onClose }: ImagePreviewProps) {
                         <div className={cn("transition-opacity flex items-center sm:block gap-2 sm:gap-0", !isCompressedAvailable ? "opacity-30" : (!showCompressed ? "opacity-50" : "opacity-100 font-medium"))}>
                             <p className="text-muted-foreground text-2xs sm:text-xs uppercase tracking-widest sm:mb-0.5">Comp<span className="hidden sm:inline">ressed</span><span className="sm:hidden">:</span></p>
                             <div className="flex items-center gap-2">
-                                <p className="text-sm sm:text-base font-medium">{compressedSize ? formatBytes(compressedSize) : '---'}</p>
+                                <p className="text-xs sm:text-sm font-medium">{compressedSize ? formatBytes(compressedSize) : '---'}</p>
                                 {percentSaved !== undefined && (
                                     <Badge variant={percentSaved > 0 ? 'default' : 'secondary'} className="text-2xs h-4 sm:h-5 px-1 sm:px-1.5 bg-green-500/15 text-green-600 dark:text-green-400 hover:bg-green-500/25 border-green-500/20">
                                         -{percentSaved}%
