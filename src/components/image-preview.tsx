@@ -104,7 +104,7 @@ export function ImagePreview({ file, isOpen, onClose }: ImagePreviewProps) {
                         </div>
                         <div className="min-w-0">
                             <h3 className="font-semibold text-sm sm:text-base leading-tight truncate">{file.name}</h3>
-                            <p className="text-2xs text-muted-foreground">preview mode</p>
+                            <p className="text-xs text-muted-foreground">preview mode</p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
