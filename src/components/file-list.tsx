@@ -124,7 +124,6 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
                     <div className="flex flex-wrap justify-between gap-y-1 text-sm">
                         <span className="text-muted-foreground">
                             {completedCount} of {files.length} complete
-                            {processingCount > 0 && ` • ${processingCount} processing`}
                             {errorCount > 0 && ` • ${errorCount} failed`}
                         </span>
                         {totalSaved > 0 && (
