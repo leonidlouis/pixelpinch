@@ -6,6 +6,66 @@ import { getWorkerPool } from './worker-pool';
 
 
 /**
+ * Async semaphore for limiting concurrent operations.
+ * Used to prevent memory exhaustion when processing large batches of images.
+ * 
+ * The semaphore ensures that at most `permits` operations can run concurrently.
+ * Additional operations wait in a queue and proceed as permits are released.
+ */
+class AsyncSemaphore {
+    private permits: number;
+    private waitQueue: (() => void)[] = [];
+
+    constructor(permits: number) {
+        this.permits = permits;
+    }
+
+    /**
+     * Acquire a permit. If no permits are available, wait in queue.
+     */
+    async acquire(): Promise<void> {
+        if (this.permits > 0) {
+            this.permits--;
+            return;
+        }
+        // No permits available - wait in queue
+        return new Promise<void>(resolve => {
+            this.waitQueue.push(resolve);
+        });
+    }
+
+    /**
+     * Release a permit. If tasks are waiting, wake the next one.
+     */
+    release(): void {
+        const next = this.waitQueue.shift();
+        if (next) {
+            // Pass permit directly to next waiter
+            next();
+        } else {
+            // No waiters - return permit to pool
+            this.permits++;
+        }
+    }
+}
+
+// Detect iOS for more conservative memory limits
+function isIOSDevice(): boolean {
+    if (typeof navigator === 'undefined') return false;
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+// Get optimal concurrency limit based on device
+function getOptimalConcurrencyLimit(): number {
+    const isIOS = isIOSDevice();
+    // iOS Safari has stricter memory limits - use conservative value
+    // Desktop can handle more concurrent preparations
+    return isIOS ? 3 : 6;
+}
+
+
+/**
  * Generates a unique ID for file tracking.
  * @returns A random string ID
  */
@@ -159,7 +219,13 @@ async function compressFileWithWorker(
 
 /**
  * Compress multiple files in parallel using the worker pool.
- * Handles concurrency, error recovery, and status updates.
+ * Uses a sliding window approach to limit memory usage while maximizing throughput.
+ * 
+ * Memory Management:
+ * - Uses AsyncSemaphore to limit concurrent file preparations
+ * - Each file must acquire a permit before its ArrayBuffer is created
+ * - Permits are released after compression completes
+ * - This prevents iOS Safari from killing the page due to memory pressure
  * 
  * @param files - Array of ImageFile objects to compress
  * @param settings - Compression settings (quality, format)
@@ -175,10 +241,26 @@ export async function compressFiles(
     const pool = getWorkerPool();
     await pool.initialize();
 
-    // Process all files in parallel using allSettled for resilience
-    // This ensures one failure doesn't break the entire batch
+    // Create semaphore to limit concurrent file preparations
+    // This is the key to preventing memory exhaustion on mobile devices
+    const concurrencyLimit = getOptimalConcurrencyLimit();
+    const semaphore = new AsyncSemaphore(concurrencyLimit);
+
+    // Process all files with controlled concurrency
+    // Each file waits for a semaphore permit before preparing its ArrayBuffer
+    // This creates a "sliding window" of files in memory
     const results = await Promise.allSettled(
-        files.map(file => compressFileWithWorker(file, settings, onProgress))
+        files.map(async (file) => {
+            // Wait for a permit before preparing file (creating ArrayBuffer)
+            await semaphore.acquire();
+            try {
+                return await compressFileWithWorker(file, settings, onProgress);
+            } finally {
+                // Release permit after compression completes (success or failure)
+                // This allows the next file in queue to start preparing
+                semaphore.release();
+            }
+        })
     );
 
     // Extract values, converting rejected promises to error results
