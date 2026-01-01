@@ -198,7 +198,7 @@ export default function Home() {
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg sm:text-xl font-bold tracking-tight">PixelPinch</h1>
-                <p className="text-xs text-muted-foreground hidden sm:block">Instant batch compression</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">Instant image batch compression</p>
               </div>
             </div>
 
