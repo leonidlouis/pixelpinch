@@ -205,21 +205,19 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                                 <p>
                                     <span className="font-semibold">Your device:</span> {maxWorkers} max workers available
                                 </p>
-                                <p>
-                                    <span className="font-semibold">Default:</span> {defaultWorkers} workers
-                                </p>
+
+                                {isMobile && <p>
+                                    <span className="font-semibold">Default:</span> {defaultWorkers} workers (recommended for mobile devices)
+                                </p>}
+
                                 <div className="flex items-start gap-2 mt-2 p-2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
                                     <AlertTriangle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0" />
                                     <div className="space-y-1">
                                         <p>
-                                            Certain operating systems like iOS cap the usage of RAM for a webpage.
-                                            If an &quot;overuse&quot; of RAM is detected, iOS will kill that webpage.
+                                            High concurrency (parallel worker count) increases memory usage and may cause crashes / forced page reload on some devices (especially iOS).
                                         </p>
                                         <p>
-                                            Using lots of parallel workers uses more RAM, which may cause the page to be forcibly reloaded.
-                                        </p>
-                                        <p>
-                                            If this happens, try reducing this to 1.
+                                            If the page reloads unexpectedly, try reducing this to 1.
                                         </p>
                                     </div>
                                 </div>
