@@ -33,7 +33,9 @@ export function getMaxParallelWorkers(): number {
 export function getDefaultParallelWorkers(): number {
     const max = getMaxParallelWorkers();
     if (isMobileDevice()) {
-        return Math.min(3, max);
+        // Default to 2 on mobile for safety (lower memory pressure)
+        // User can still increase it if they have a powerful device
+        return Math.min(2, max);
     }
     return max;
 }
@@ -52,16 +54,11 @@ export class WorkerPool {
     private isInitialized = false;
 
     constructor(maxWorkers?: number) {
-        const cpuWorkers = Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
-
         if (maxWorkers !== undefined) {
             this.maxWorkers = maxWorkers;
-        } else if (isMobileDevice()) {
-            // Mobile: cap at 3 to prevent memory issues
-            this.maxWorkers = Math.min(3, cpuWorkers);
         } else {
-            // Desktop: use full CPU capacity
-            this.maxWorkers = cpuWorkers;
+            // Use default logic if not specified
+            this.maxWorkers = getDefaultParallelWorkers();
         }
     }
 
