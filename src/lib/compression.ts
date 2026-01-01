@@ -223,12 +223,13 @@ async function compressFileWithWorker(
  * 
  * Memory Management:
  * - Uses AsyncSemaphore to limit concurrent file preparations
+ * - Concurrency limit is controlled by settings.parallelWorkers (user-configurable)
  * - Each file must acquire a permit before its ArrayBuffer is created
  * - Permits are released after compression completes
  * - This prevents iOS Safari from killing the page due to memory pressure
  * 
  * @param files - Array of ImageFile objects to compress
- * @param settings - Compression settings (quality, format)
+ * @param settings - Compression settings (quality, format, parallelWorkers)
  * @param onProgress - Callback function invoked when a file's status changes
  * @returns Promise resolving to the array of processed ImageFiles
  */
@@ -241,9 +242,9 @@ export async function compressFiles(
     const pool = getWorkerPool();
     await pool.initialize();
 
-    // Create semaphore to limit concurrent file preparations
-    // This is the key to preventing memory exhaustion on mobile devices
-    const concurrencyLimit = getOptimalConcurrencyLimit();
+    // Use user-configured parallelWorkers for concurrency control
+    // This allows users to trade off speed vs memory based on their device
+    const concurrencyLimit = settings.parallelWorkers || getOptimalConcurrencyLimit();
     const semaphore = new AsyncSemaphore(concurrencyLimit);
 
     // Process all files with controlled concurrency
