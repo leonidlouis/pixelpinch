@@ -129,7 +129,8 @@
 
 /* iOS safe area + GPU layer isolation for fixed elements */
 .safe-area-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+  /* Base padding (24px) + safe area inset for iOS home indicator */
+  padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
