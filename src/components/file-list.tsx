@@ -23,25 +23,39 @@ interface FileListProps {
     files: ImageFile[];
     onRemoveFile: (id: string) => void;
     onClearAll: () => void;
-    onRetryFile?: (id: string) => void;
+    onRetryFile?: (file: ImageFile) => void;
 }
 
 export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileListProps) {
 
     // Memoize expensive calculations to avoid recalculating on every render
     const stats = useMemo(() => {
-        const completed = files.filter(f => f.status === 'done');
-        const totalOriginal = files.reduce((sum, f) => sum + f.originalSize, 0);
-        const totalCompressed = completed.reduce((sum, f) => sum + (f.compressedSize || 0), 0);
+        let totalOriginal = 0;
+        let totalCompressed = 0;
+        let completedCount = 0;
+        let processingCount = 0;
+        let errorCount = 0;
+
+        files.forEach(f => {
+            totalOriginal += f.originalSize;
+            if (f.status === 'done') {
+                completedCount++;
+                totalCompressed += (f.compressedSize || 0);
+            } else if (f.status === 'processing') {
+                processingCount++;
+            } else if (f.status === 'error') {
+                errorCount++;
+            }
+        });
 
         return {
             totalOriginal,
             totalCompressed,
-            completedCount: completed.length,
-            processingCount: files.filter(f => f.status === 'processing').length,
-            errorCount: files.filter(f => f.status === 'error').length,
+            completedCount,
+            processingCount,
+            errorCount,
             overallProgress: files.length > 0
-                ? Math.round((completed.length / files.length) * 100)
+                ? Math.round((completedCount / files.length) * 100)
                 : 0,
             totalSaved: totalOriginal > 0 && totalCompressed > 0
                 ? Math.round(((totalOriginal - totalCompressed) / totalOriginal) * 100)
@@ -120,8 +134,8 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
                             <FileItem
                                 key={file.id}
                                 file={file}
-                                onRemove={() => onRemoveFile(file.id)}
-                                onRetry={onRetryFile ? () => onRetryFile(file.id) : undefined}
+                                onRemove={onRemoveFile}
+                                onRetry={onRetryFile}
                             />
                         ))}
                     </div>
@@ -135,8 +149,8 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
 
 interface FileItemProps {
     file: ImageFile;
-    onRemove: () => void;
-    onRetry?: () => void;
+    onRemove: (id: string) => void;
+    onRetry?: (file: ImageFile) => void;
 }
 
 // Download individual file
@@ -230,7 +244,7 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={onRetry}
+                        onClick={() => onRetry?.(file)}
                         aria-label={`Retry ${file.name}`}
                         className="h-9 w-9"
                     >
@@ -242,7 +256,7 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={onRemove}
+                    onClick={() => onRemove(file.id)}
                     aria-label={`Remove ${file.name}`}
                     className="h-9 w-9 opacity-60 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity touch-manipulation"
                 >
