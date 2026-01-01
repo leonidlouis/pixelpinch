@@ -1,18 +1,87 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { DropZone } from '@/components/drop-zone';
 import { SettingsPanel } from '@/components/settings-panel';
 import { FileList } from '@/components/file-list';
 import { DownloadButton } from '@/components/download-button';
 import { Button } from '@/components/ui/button';
-import { Play, Zap } from 'lucide-react';
+import { Play, Zap, Heart } from 'lucide-react';
 import {
   generateId,
   compressFiles,
   isValidImageFile
 } from '@/lib/compression';
 import type { ImageFile, CompressionSettings } from '@/types/compression';
+
+function SupportDropdown() {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium transition-all text-[11px] uppercase tracking-wider"
+      >
+        <Heart className="w-3.5 h-3.5 fill-current" />
+        Support
+      </button>
+
+      {isOpen && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 p-1.5 bg-popover border border-border/50 rounded-xl shadow-2xl min-w-[220px] animate-in fade-in slide-in-from-bottom-2 duration-200 z-50">
+          <div className="flex flex-col gap-1">
+            {[
+              {
+                label: 'Buy me a coffee',
+                href: 'https://www.buymeacoffee.com/louvre_',
+                emoji: '☕',
+              },
+              {
+                label: 'Saweria (ID 🇮🇩)',
+                href: 'https://saweria.co/louvre325',
+                emoji: '💸',
+              },
+            ].map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-all group"
+              >
+                <span className="text-xl flex-shrink-0 transition-transform group-hover:scale-110 group-active:scale-95">
+                  {item.emoji}
+                </span>
+                <span className="text-sm font-medium text-foreground/70 group-hover:text-foreground">
+                  {item.label}
+                </span>
+              </a>
+            ))}
+          </div>
+          {/* Arrow */}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-[5px]">
+            <div className="w-2.5 h-2.5 bg-popover border-r border-b border-border/50 rotate-45"></div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Home() {
   const [files, setFiles] = useState<ImageFile[]>([]);
@@ -190,15 +259,7 @@ export default function Home() {
           <div className="flex items-center justify-center gap-3 text-xs">
             <span>Made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Louis</a></span>
             <span className="text-border">•</span>
-            <a
-              href="https://buymeacoffee.com/louvre_"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFDD00] text-[#000000] font-medium hover:bg-[#FFDD00]/90 transition-colors"
-            >
-              <span>☕</span>
-              <span>Support</span>
-            </a>
+            <SupportDropdown />
           </div>
         </div>
       </footer>
