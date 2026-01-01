@@ -116,7 +116,7 @@ export function DropZone({ onFilesAdded, disabled }: DropZoneProps) {
                 </div>
 
                 <p id="upload-instructions" className="text-xs text-muted-foreground">
-                    Supports JPG, PNG, WebP, HEIC • Up to 50+ images at once
+                    Supports JPEG, PNG, WebP, HEIC • as many images as you want
                 </p>
             </div>
         </div>

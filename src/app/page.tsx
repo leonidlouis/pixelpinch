@@ -6,7 +6,7 @@ import { SettingsPanel } from '@/components/settings-panel';
 import { FileList } from '@/components/file-list';
 import { DownloadButton } from '@/components/download-button';
 import { Button } from '@/components/ui/button';
-import { Play, Zap, CoffeeIcon } from 'lucide-react';
+import { Play, Zap, CoffeeIcon, RefreshCw } from 'lucide-react';
 import {
   generateId,
   compressFiles,
@@ -87,9 +87,16 @@ export default function Home() {
   const [files, setFiles] = useState<ImageFile[]>([]);
   const [settings, setSettings] = useState<CompressionSettings>({
     quality: 80,
-    format: 'webp',
+    format: 'jpeg',
   });
+  const [lastRunSettings, setLastRunSettings] = useState<CompressionSettings | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Check if settings changed since last run
+  const hasUnsavedChanges = lastRunSettings && (
+    lastRunSettings.quality !== settings.quality ||
+    lastRunSettings.format !== settings.format
+  );
 
   // Add new files
   const handleFilesAdded = useCallback((newFiles: File[]) => {
@@ -121,17 +128,34 @@ export default function Home() {
   // Clear all files
   const handleClearAll = useCallback(() => {
     setFiles([]);
+    setLastRunSettings(null);
   }, []);
 
-  // Start compression
+  // Start compression or Re-compress
   const handleStartCompression = useCallback(async () => {
-    const pendingFiles = files.filter(f => f.status === 'pending');
-    if (pendingFiles.length === 0) return;
+    let filesToProcess = files.filter(f => f.status === 'pending');
+
+    // Re-compress mode: If no pending files but we have settings changes, re-do everything
+    if (filesToProcess.length === 0 && files.length > 0) {
+      filesToProcess = files.map(f => ({
+        ...f,
+        status: 'pending' as const,
+        error: undefined,
+        compressedSize: undefined,
+        compressedBlob: undefined,
+        percentSaved: undefined
+      }));
+      // Update UI immediately to show pending state
+      setFiles(filesToProcess);
+    }
+
+    if (filesToProcess.length === 0) return;
 
     setIsProcessing(true);
+    setLastRunSettings(settings);
 
     try {
-      await compressFiles(pendingFiles, settings, updateFile);
+      await compressFiles(filesToProcess, settings, updateFile);
     } finally {
       setIsProcessing(false);
     }
@@ -156,16 +180,17 @@ export default function Home() {
 
   const pendingCount = files.filter(f => f.status === 'pending').length;
   const processingCount = files.filter(f => f.status === 'processing').length;
+  const showRecompress = files.length > 0 && pendingCount === 0 && hasUnsavedChanges;
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-muted/20 flex flex-col overflow-x-hidden">
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border/50 supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground flex-shrink-0 shadow-lg shadow-primary/20">
-                <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
+              <div className="p-2 rounded-xl bg-neutral-900 flex-shrink-0 shadow-lg shadow-yellow-500/20">
+                <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400 fill-yellow-400" />
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg sm:text-xl font-bold tracking-tight">PixelPinch</h1>
@@ -192,7 +217,7 @@ export default function Home() {
 
         {/* If we have files, show settings and file list */}
         {files.length > 0 && (
-          <div className="grid gap-6 lg:grid-cols-[300px_1fr] pb-24 lg:pb-0">
+          <div className="grid gap-6 lg:grid-cols-[300px_1fr] lg:pb-0">
             {/* Sidebar: Settings + Actions */}
             <div className="space-y-4 order-2 lg:order-1">
               <SettingsPanel
@@ -205,20 +230,22 @@ export default function Home() {
               <Button
                 size="lg"
                 onClick={handleStartCompression}
-                disabled={!pendingCount || isProcessing}
+                disabled={(!pendingCount && !showRecompress) || isProcessing}
                 className="w-full gap-2 hidden lg:flex shadow-lg shadow-primary/10"
               >
-                <Play className="w-5 h-5" />
+                {showRecompress ? <RefreshCw className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                 {isProcessing
                   ? `Processing (${processingCount})...`
-                  : pendingCount > 0
-                    ? `Compress ${pendingCount} file${pendingCount > 1 ? 's' : ''}`
-                    : 'All done!'}
+                  : showRecompress
+                    ? 'Re-compress'
+                    : pendingCount > 0
+                      ? `Compress ${pendingCount} file${pendingCount > 1 ? 's' : ''}`
+                      : 'Finished'}
               </Button>
             </div>
 
             {/* Main: File List */}
-            <div className="order-1 lg:order-2">
+            <div className="order-1 lg:order-2 min-w-0 w-full">
               <FileList
                 files={files}
                 onRemoveFile={handleRemoveFile}
@@ -233,15 +260,17 @@ export default function Home() {
                 <Button
                   size="lg"
                   onClick={handleStartCompression}
-                  disabled={!pendingCount || isProcessing}
+                  disabled={(!pendingCount && !showRecompress) || isProcessing}
                   className="w-full gap-2 shadow-xl shadow-primary/20"
                 >
-                  <Play className="w-5 h-5" />
+                  {showRecompress ? <RefreshCw className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                   {isProcessing
                     ? `Processing (${processingCount})...`
-                    : pendingCount > 0
-                      ? `Compress ${pendingCount} file${pendingCount > 1 ? 's' : ''}`
-                      : 'Start Compression'}
+                    : showRecompress
+                      ? 'Re-compress'
+                      : pendingCount > 0
+                        ? `Compress ${pendingCount} file${pendingCount > 1 ? 's' : ''}`
+                        : 'Finished'}
                 </Button>
               </div>
             </div>
@@ -251,11 +280,8 @@ export default function Home() {
         {/* Empty State */}
         {files.length === 0 && (
           <div className="text-center py-8 animate-in fade-in zoom-in-95 duration-500">
-            <p className="text-muted-foreground">
-              Drop some images above to get started
-            </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
-              {['Lightning fast', 'Batch 50+', '100% private', 'WebP & JPEG'].map((feature) => (
+              {['lightning fast', 'no limits', '100% private'].map((feature) => (
                 <span
                   key={feature}
                   className="px-3 py-1 rounded-full bg-muted text-xs font-medium"
@@ -269,7 +295,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 lg:mt-auto">
+      <footer className="border-t border-border/50 lg:mt-auto pb-15 lg:pb-0">
         <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground space-y-3">
           <p>
             All processing happens in your browser. Your images never leave your device.

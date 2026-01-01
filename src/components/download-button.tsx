@@ -86,7 +86,7 @@ export function DownloadButton({ files, disabled }: DownloadButtonProps) {
                 <>
                     <Archive className="w-4 h-4 sm:w-5 sm:h-5" />
                     <span className="hidden sm:inline">Download All ({completedFiles.length})</span>
-                    <span className="sm:hidden">Download All ({completedFiles.length})</span>
+                    <span className="sm:hidden">Download ({completedFiles.length})</span>
                 </>
             ) : (
                 <>
