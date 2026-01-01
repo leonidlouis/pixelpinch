@@ -172,7 +172,8 @@ async function compressFileWithWorker(
         };
 
         // Send to worker pool for compression with timeout
-        const pool = getWorkerPool();
+        // Note: pool was already sized correctly by compressFiles()
+        const pool = getWorkerPool(settings.parallelWorkers);
         const response = await withTimeout(
             pool.compress(request),
             COMPRESSION_TIMEOUT_MS,
@@ -296,7 +297,7 @@ export async function compressFile(
     settings: CompressionSettings,
     onProgress: (file: ImageFile) => void
 ): Promise<ImageFile> {
-    const pool = getWorkerPool();
+    const pool = getWorkerPool(settings.parallelWorkers);
     await pool.initialize();
     return compressFileWithWorker(imageFile, settings, onProgress);
 }
