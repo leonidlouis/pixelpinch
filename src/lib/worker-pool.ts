@@ -24,8 +24,10 @@ export class WorkerPool {
     private isInitialized = false;
 
     constructor(maxWorkers?: number) {
-        // Use hardware concurrency minus 1 to leave a core for UI
-        this.maxWorkers = maxWorkers ?? Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
+        // Cap at 4 workers to limit memory usage during large batch processing
+        // Still leaves cores for UI responsiveness
+        const cpuWorkers = Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
+        this.maxWorkers = maxWorkers ?? Math.min(4, cpuWorkers);
     }
 
     async initialize(): Promise<void> {
