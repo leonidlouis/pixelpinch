@@ -23,20 +23,74 @@ export function isMobileDevice(): boolean {
     return mobileUA || (hasTouch && isSmallScreen);
 }
 
+/**
+ * Detects device memory tier and returns recommended max workers.
+ * Uses multiple heuristics since Safari doesn't expose memory APIs.
+ */
+function getDeviceMemoryTier(): 'low' | 'medium' | 'high' {
+    if (typeof navigator === 'undefined') return 'high';
+
+    // Tier 1: Direct memory API (Chrome/Firefox/Edge)
+    // @ts-expect-error - deviceMemory is not in standard types yet
+    const deviceMemory = navigator.deviceMemory;
+    if (deviceMemory !== undefined) {
+        if (deviceMemory <= 2) return 'low';
+        if (deviceMemory <= 4) return 'medium';
+        return 'high';
+    }
+
+    // Tier 2: iOS version detection (Safari)
+    // iOS 12-14 = 2GB devices (iPhone 6s-8 era)
+    // iOS 15-17 = Mixed 2-4GB
+    // iOS 18+ = 4GB+ (iPhone XS and newer)
+    const ua = navigator.userAgent;
+    const iosMatch = ua.match(/CPU iPhone OS (\d+)_/);
+    if (iosMatch) {
+        const iosVersion = parseInt(iosMatch[1], 10);
+        if (iosVersion <= 14) return 'low';    // Likely 2GB devices
+        if (iosVersion <= 17) return 'medium'; // Mixed 2-4GB
+        return 'high'; // iOS 18+ targets 3GB+ devices
+    }
+
+    // Tier 3: Screen-based fallback for other mobile
+    if (isMobileDevice()) {
+        const screenWidth = typeof window !== 'undefined' ? window.screen.width : 0;
+        if (screenWidth <= 375) return 'low';  // iPhone 8/SE width
+        if (screenWidth <= 428) return 'medium'; // iPhone Max width
+    }
+
+    return 'high'; // Desktop or unknown
+}
+
 // Get the maximum allowed workers for this device
 export function getMaxParallelWorkers(): number {
     if (typeof navigator === 'undefined') return 4;
-    return Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
+
+    const tier = getDeviceMemoryTier();
+    const cores = Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
+    const isMobile = isMobileDevice();
+
+    switch (tier) {
+        case 'low': return 1; // Aggressive limit for 2GB devices (prevents WASM OOM)
+        case 'medium': return Math.min(2, cores);
+        case 'high':
+            // Desktop: Cap at 8 to prevent browser hang
+            // Mobile: Cap at 3 for stability/heat even on high-end phones
+            return isMobile ? Math.min(3, cores) : Math.min(8, cores);
+    }
 }
 
 // Get the recommended default workers based on device type
 export function getDefaultParallelWorkers(): number {
     const max = getMaxParallelWorkers();
+
+    // On mobile, default to a safe value (usually max)
+    // Since getMaxParallelWorkers is now smarter, we can trust it more,
+    // but still cap at 2 for potential battery/heat reasons on mobile
     if (isMobileDevice()) {
-        // Default to 2 on mobile for safety (lower memory pressure)
-        // User can still increase it if they have a powerful device
         return Math.min(2, max);
     }
+
     return max;
 }
 
