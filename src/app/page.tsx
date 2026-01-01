@@ -138,9 +138,8 @@ export default function Home() {
   }, [files, settings, updateFile]);
 
   // Retry a failed file
-  const handleRetryFile = useCallback(async (id: string) => {
-    const file = files.find(f => f.id === id);
-    if (!file || file.status !== 'error' || !file.file) return;
+  const handleRetryFile = useCallback(async (file: ImageFile) => {
+    if (file.status !== 'error' || !file.file) return;
 
     // Reset file to pending
     const resetFile: ImageFile = { ...file, status: 'pending', error: undefined };
@@ -153,7 +152,7 @@ export default function Home() {
     } finally {
       setIsProcessing(false);
     }
-  }, [files, settings, updateFile]);
+  }, [settings, updateFile]);
 
   const pendingCount = files.filter(f => f.status === 'pending').length;
   const processingCount = files.filter(f => f.status === 'processing').length;
