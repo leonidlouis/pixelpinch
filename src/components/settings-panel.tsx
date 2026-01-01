@@ -227,11 +227,11 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
                                     More workers = faster, but uses more memory.
                                 </p>
                                 <p>
-                                    <span className="font-semibold">Your device:</span> {maxWorkers} max workers available
+                                    <span className="font-semibold">Your device limit:</span> {maxWorkers} max workers available
                                 </p>
 
                                 {isMobile && <p>
-                                    <span className="font-semibold">Default:</span> {defaultWorkers} workers (recommended for mobile devices)
+                                    <span className="font-semibold">Default setting:</span> {defaultWorkers} workers (recommended for your device)
                                 </p>}
 
                                 <div className="flex items-start gap-2 mt-2 p-2 rounded bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400">
