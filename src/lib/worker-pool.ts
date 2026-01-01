@@ -1,6 +1,3 @@
-// Worker Pool for managing concurrent compression workers
-// Limits concurrency to prevent memory exhaustion
-
 import type { CompressionRequest, CompressionResponse, WorkerResponse } from '@/types/compression';
 
 type TaskCallback = (response: CompressionResponse) => void;
@@ -10,10 +7,26 @@ interface QueuedTask {
     callback: TaskCallback;
 }
 
+// Detect mobile devices for conservative worker limits
+function isMobileDevice(): boolean {
+    if (typeof navigator === 'undefined') return false;
+
+    // Check for touch capability + small screen (rules out touch laptops)
+    const hasTouch = navigator.maxTouchPoints > 0;
+    const isSmallScreen = typeof window !== 'undefined' && window.innerWidth < 1024;
+
+    // Also check user agent for mobile keywords
+    const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+    );
+
+    return mobileUA || (hasTouch && isSmallScreen);
+}
+
 
 /**
  * Manages a pool of Web Workers for parallel image compression.
- * Limits concurrency to `navigator.hardwareConcurrency - 1` to ensure UI responsiveness.
+ * Limits concurrency based on device type to balance performance and memory.
  */
 export class WorkerPool {
     private workers: Worker[] = [];
@@ -24,10 +37,17 @@ export class WorkerPool {
     private isInitialized = false;
 
     constructor(maxWorkers?: number) {
-        // Cap at 4 workers to limit memory usage during large batch processing
-        // Still leaves cores for UI responsiveness
         const cpuWorkers = Math.max(1, (navigator.hardwareConcurrency || 4) - 1);
-        this.maxWorkers = maxWorkers ?? Math.min(4, cpuWorkers);
+
+        if (maxWorkers !== undefined) {
+            this.maxWorkers = maxWorkers;
+        } else if (isMobileDevice()) {
+            // Mobile: cap at 3 to prevent memory issues
+            this.maxWorkers = Math.min(3, cpuWorkers);
+        } else {
+            // Desktop: use full CPU capacity
+            this.maxWorkers = cpuWorkers;
+        }
     }
 
     async initialize(): Promise<void> {
