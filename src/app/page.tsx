@@ -221,7 +221,7 @@ export default function Home() {
 
         {/* If we have files, show settings and file list */}
         {files.length > 0 && (
-          <div className="grid gap-6 lg:grid-cols-[340px_1fr] lg:pb-0">
+          <div className="grid gap-6 lg:grid-cols-[380px_1fr] lg:pb-0">
             {/* Sidebar: Settings + Actions */}
             <div className="space-y-4 order-2 lg:order-1">
               <SettingsPanel
