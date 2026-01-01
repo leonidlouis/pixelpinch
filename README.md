@@ -1,163 +1,260 @@
-# PixelPinch 🖼️⚡
+# PixelPinch ⚡
 
-A privacy-focused, client-side batch image compression web app. Compress 50+ images at once without uploading anything to a server.
+**Free, private, client-side batch image compression.**
 
-![PixelPinch Demo](docs/demo.png)
+> Your images never leave your browser. All compression happens locally using WebAssembly.
 
-## Features
+---
 
-- **🔒 Privacy First** - All processing happens in your browser. Images never leave your device.
-- **📦 Batch Processing** - Compress 50+ images at once
-- **🖼️ Multiple Formats** - Supports JPG, PNG, WebP, and HEIC (iPhone photos)
-- **⚙️ Adjustable Quality** - Fine-tune compression from 1-100%
-- **📊 Real-time Stats** - See original vs compressed size and % saved per file
-- **📥 Bulk Download** - Download all compressed files as a ZIP
+## ✨ Features
 
-## Tech Stack
+- **🔒 100% Private** — Zero server uploads. All processing happens in your browser.
+- **⚡ Blazing Fast** — Parallel compression via Web Workers (uses all CPU cores).
+- **📦 Batch Processing** — No arbitrary limits. Compress as many images as your device can handle.
+- **🔄 Re-compress** — Tweak settings and re-process without re-uploading.
+- **📱 Mobile Ready** — Responsive design works on any device.
+- **📥 One-Click Download** — Individual files or ZIP archive.
 
-- **Framework**: Next.js 16+ with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4 + shadcn/ui
-- **Compression**: [jSquash](https://github.com/nickreese/jSquash) (WASM-based MozJPEG, WebP, PNG codecs)
-- **HEIC Support**: [heic2any](https://github.com/nickreese/heic2any)
-- **Icons**: Lucide React
+### Supported Formats
 
-## Architecture
+| Input | Output |
+|-------|--------|
+| JPEG, PNG, WebP, HEIC/HEIF | JPEG, WebP |
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        BROWSER (Client)                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐  │
+│  │   Drop Zone  │───▶│  File State  │───▶│  Settings Panel  │  │
+│  │  (Upload UI) │    │   (React)    │    │  (Quality/Format)│  │
+│  └──────────────┘    └──────┬───────┘    └────────┬─────────┘  │
+│                             │                     │             │
+│                             ▼                     │             │
+│                   ┌─────────────────┐             │             │
+│                   │   Compression   │◀────────────┘             │
+│                   │  Orchestrator   │                           │
+│                   │  (Main Thread)  │                           │
+│                   └────────┬────────┘                           │
+│                            │                                    │
+│         ┌──────────────────┼──────────────────┐                 │
+│         ▼                  ▼                  ▼                 │
+│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐         │
+│  │  Worker #1  │    │  Worker #2  │    │  Worker #N  │         │
+│  │   (WASM)    │    │   (WASM)    │    │   (WASM)    │         │
+│  └─────────────┘    └─────────────┘    └─────────────┘         │
+│        │                  │                  │                  │
+│        └──────────────────┴──────────────────┘                  │
+│                            │                                    │
+│                            ▼                                    │
+│                   ┌─────────────────┐                           │
+│                   │  Compressed     │                           │
+│                   │  Blob / ZIP     │──▶ Download               │
+│                   └─────────────────┘                           │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📂 Project Structure
 
 ```
 src/
-├── app/
-│   ├── page.tsx          # Main application page
-│   ├── layout.tsx         # Root layout with metadata
-│   └── globals.css        # Tailwind + global styles
+├── app/                       # Next.js App Router
+│   ├── page.tsx               # Main page component
+│   ├── layout.tsx             # Root layout with metadata
+│   ├── globals.css            # Tailwind styles
+│   ├── icon.png               # Favicon
+│   ├── apple-icon.png         # Apple touch icon
+│   ├── opengraph-image.png    # OG image for social sharing
+│   └── twitter-image.png      # Twitter card image
+│
 ├── components/
-│   ├── drop-zone.tsx      # Drag & drop file input
-│   ├── settings-panel.tsx # Quality slider + format selector
-│   ├── file-list.tsx      # File status and progress
-│   └── download-button.tsx# Single/batch ZIP download
+│   ├── drop-zone.tsx          # Drag & drop file upload
+│   ├── file-list.tsx          # File list with progress + individual rows
+│   ├── settings-panel.tsx     # Quality slider + format toggle
+│   ├── download-button.tsx    # Single/ZIP download logic
+│   └── ui/                    # Radix-based UI primitives
+│       ├── badge.tsx
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── progress.tsx
+│       └── slider.tsx
+│
 ├── lib/
-│   └── compression.ts     # jSquash orchestration layer
+│   ├── compression.ts         # Orchestrates compression flow
+│   ├── worker-pool.ts         # Manages Web Worker concurrency
+│   └── utils.ts               # Tailwind merge utility
+│
+├── workers/
+│   └── compression.worker.ts  # WASM compression worker
+│
 └── types/
-    └── compression.ts     # TypeScript interfaces
+    └── compression.ts         # TypeScript interfaces
 ```
 
-### Compression Flow
+---
 
-1. User drops images → validated and queued
-2. Click "Compress" → `compression.ts` initializes jSquash codecs
-3. Images decoded (JPEG/PNG/WebP) → encoded to target format
-4. Results shown with size reduction stats
-5. Download individual files or ZIP archive
-
-### Web Worker Architecture
-
-Image compression runs in a **parallel Web Worker pool** for maximum performance:
+## 🚀 How It Works (Flowchart)
 
 ```
-Main Thread                    Worker Pool (N-1 cores)
-    │                              │
-    ├─► HEIC→PNG conversion        │
-    │   (requires Canvas API)      │
-    │                              │
-    └─► Send ArrayBuffer ──────────┼─► Worker 1: decode + encode
-                                   ├─► Worker 2: decode + encode
-                                   └─► Worker N: decode + encode
+                    ┌───────────────┐
+                    │  User Drops   │
+                    │    Images     │
+                    └───────┬───────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │  Validate &   │
+                    │  Add to List  │
+                    │ (pending state│
+                    └───────┬───────┘
+                            │
+                            ▼
+                ┌───────────────────────┐
+                │  User Adjusts Settings│
+                │  (Quality 1-100%)     │
+                │  (Format: JPEG/WebP)  │
+                └───────────┬───────────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │ Click Compress│
+                    └───────┬───────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        │                   │                   │
+        ▼                   ▼                   ▼
+   ┌─────────┐         ┌─────────┐         ┌─────────┐
+   │Worker #1│         │Worker #2│         │Worker #N│
+   │ (WASM)  │         │ (WASM)  │         │ (WASM)  │
+   │ encode  │         │ encode  │         │ encode  │
+   └────┬────┘         └────┬────┘         └────┬────┘
+        │                   │                   │
+        └───────────────────┴───────────────────┘
+                            │
+                            ▼
+                    ┌───────────────┐
+                    │  Update State │
+                    │  (done/error) │
+                    └───────┬───────┘
+                            │
+          ┌─────────────────┴─────────────────┐
+          │                                   │
+          ▼                                   ▼
+   ┌──────────────┐                  ┌──────────────┐
+   │ Settings     │                  │   Download   │
+   │ Changed?     │                  │  (ZIP if >1) │
+   └──────┬───────┘                  └──────────────┘
+          │
+          ▼ Yes
+   ┌──────────────┐
+   │ Re-compress  │◀────────────────────────┐
+   │ (reset state)│                         │
+   └──────────────┘                         │
+                                            │
+          ▲                                 │
+          └─────────── Loop ────────────────┘
 ```
 
-**Key design decisions:**
+---
 
-1. **Pre-compiled worker bundle** - The TypeScript worker is compiled with esbuild to `/public/workers/compression.worker.js`. This bypasses Turbopack's blob URL issues with WASM loading.
+## 🛠️ Tech Stack
 
-2. **HEIC on main thread** - `heic2any` requires the Canvas API, which isn't available in workers. HEIC files are converted to PNG on the main thread before being sent to workers.
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 16.1 (App Router) |
+| UI | React 19, Radix UI, Tailwind CSS 4 |
+| Compression | jSquash (WebP, JPEG, PNG WASM codecs) |
+| HEIC Support | heic2any |
+| Concurrency | Web Workers (parallel, pool-based) |
+| Downloads | Browser Blob API, JSZip |
+| Build | Turbopack, esbuild (worker bundling) |
 
-3. **Parallel processing** - Worker pool uses `navigator.hardwareConcurrency - 1` workers, leaving one core for UI responsiveness.
+---
 
-4. **Transferable buffers** - ArrayBuffers are transferred (not copied) between main thread and workers for zero-copy performance.
-
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- npm or yarn
+- Node.js 20+
+- npm 9+
 
 ### Installation
 
 ```bash
-# Clone the repo
-git clone https://github.com/yourusername/pixelpinch.app.git
-cd pixelpinch.app
+# Clone the repository
+git clone https://github.com/your-username/pixelpinch.git
+cd pixelpinch
 
-# Install dependencies
+# Install dependencies (also copies WASM files and builds worker)
 npm install
-
-# Copy WASM files to public folder (required for WASM loading)
-npm run copy-wasm
 
 # Start development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+Open [http://localhost:3000](http://localhost:3000).
 
-### Scripts
+### Build for Production
 
 ```bash
-npm run dev          # Start Next.js dev server (Turbopack)
-npm run dev:worker   # Watch mode for worker compilation
-npm run dev:all      # Run both dev server + worker watch (recommended)
-npm run build        # Production build (auto-builds worker)
-npm run build:worker # Manually rebuild worker bundle
-npm run start        # Start production server
-npm run lint         # Run ESLint
+npm run build
+npm start
 ```
 
-## Configuration
+---
 
-### Compression Settings
+## 🐳 Docker
 
-Edit `src/lib/compression.ts` to adjust:
+```bash
+# Build image
+docker build -t pixelpinch .
 
-- Default quality: `80` (1-100)
-- Default output format: `webp` or `jpeg`
-- Supported input formats: `SUPPORTED_TYPES` array
-
-### WASM Files
-
-WASM codecs are copied from `node_modules/@jsquash/*` to `public/wasm/`:
-
-```
-public/wasm/
-├── mozjpeg_dec.wasm    # JPEG decoder
-├── mozjpeg_enc.wasm    # JPEG encoder (MozJPEG)
-├── webp_dec.wasm       # WebP decoder
-├── webp_enc.wasm       # WebP encoder
-└── squoosh_png_bg.wasm # PNG decoder
+# Run container
+docker run -p 3000:3000 pixelpinch
 ```
 
-## Browser Support
+---
 
-- Chrome 90+
-- Firefox 90+
-- Safari 15+
-- Edge 90+
+## 📜 Scripts
 
-Requires WebAssembly support.
+| Script | Description |
+|--------|-------------|
+| `npm run dev` | Start dev server (Turbopack) |
+| `npm run dev:worker` | Watch & rebuild compression worker |
+| `npm run dev:all` | Run dev server + worker watcher concurrently |
+| `npm run build` | Production build |
+| `npm run build:worker` | Bundle compression worker |
+| `npm run start` | Start production server |
+| `npm run lint` | Run ESLint |
+| `npm run copy-wasm` | Copy WASM files to public/ |
 
-## Contributing
+---
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 🔒 Privacy
 
-## License
+**PixelPinch is 100% client-side.**
 
-MIT License - see [LICENSE](LICENSE) for details.
+- No images are uploaded to any server
+- No analytics or tracking
+- No cookies
+- Works offline after initial load
 
-## Acknowledgments
+---
 
-- [jSquash](https://github.com/nickreese/jSquash) - WASM image codecs derived from Squoosh
-- [Squoosh](https://squoosh.app/) - Google's image compression playground
-- [shadcn/ui](https://ui.shadcn.com/) - Beautiful UI components
+## 📄 License
+
+MIT © 2026 Louis
+
+---
+
+<p align="center">
+  <strong>⚡ PixelPinch</strong> — Instant batch compression, zero compromise.
+</p>
