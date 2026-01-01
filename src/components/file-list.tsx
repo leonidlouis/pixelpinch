@@ -114,15 +114,19 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
             </CardHeader>
 
             <CardContent className="pt-0">
-                <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1">
-                    {files.map((file) => (
-                        <FileItem
-                            key={file.id}
-                            file={file}
-                            onRemove={() => onRemoveFile(file.id)}
-                            onRetry={onRetryFile ? () => onRetryFile(file.id) : undefined}
-                        />
-                    ))}
+                <div className="relative group/list">
+                    <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent overscroll-contain">
+                        {files.map((file) => (
+                            <FileItem
+                                key={file.id}
+                                file={file}
+                                onRemove={() => onRemoveFile(file.id)}
+                                onRetry={onRetryFile ? () => onRetryFile(file.id) : undefined}
+                            />
+                        ))}
+                    </div>
+                    {/* Scroll hint gradient - visible when content overflows */}
+                    <div className="absolute bottom-0 left-0 right-1 h-8 bg-gradient-to-t from-background to-transparent pointer-events-none opacity-0 group-hover/list:opacity-100 transition-opacity" />
                 </div>
             </CardContent>
         </Card>
@@ -199,7 +203,7 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                     <Badge variant="outline">Processing</Badge>
                 )}
                 {file.status === 'pending' && (
-                    <Badge variant="secondary">Pending</Badge>
+                    <Badge variant="secondary" className="bg-muted-foreground/10 hover:bg-muted-foreground/20 text-muted-foreground">Ready</Badge>
                 )}
                 {file.status === 'error' && (
                     <Badge variant="destructive">Failed</Badge>
