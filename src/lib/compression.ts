@@ -238,12 +238,12 @@ export async function compressFiles(
     settings: CompressionSettings,
     onProgress: (file: ImageFile) => void
 ): Promise<ImageFile[]> {
-    // Initialize worker pool (lazy initialization)
-    const pool = getWorkerPool();
+    // Get/create worker pool with user-specified size
+    // Pool will be recreated if size changed from last call
+    const pool = getWorkerPool(settings.parallelWorkers);
     await pool.initialize();
 
-    // Use user-configured parallelWorkers for concurrency control
-    // This allows users to trade off speed vs memory based on their device
+    // Use same limit for semaphore (controls sliding window of preparations)
     const concurrencyLimit = settings.parallelWorkers || getOptimalConcurrencyLimit();
     const semaphore = new AsyncSemaphore(concurrencyLimit);
 

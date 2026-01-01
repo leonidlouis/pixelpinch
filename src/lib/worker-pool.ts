@@ -190,17 +190,31 @@ export class WorkerPool {
     }
 }
 
-// Singleton instance
+// Singleton instance with size tracking
 let poolInstance: WorkerPool | null = null;
+let poolSize: number | null = null;
 
 
 /**
- * Gets the singleton instance of the WorkerPool.
- * Lazy-initializes the pool on first access.
+ * Gets or creates a WorkerPool with the specified size.
+ * If maxWorkers differs from current pool, terminates old pool and creates new one.
+ * 
+ * @param maxWorkers - Number of workers to create (optional, uses device default if not specified)
  */
-export function getWorkerPool(): WorkerPool {
-    if (!poolInstance) {
-        poolInstance = new WorkerPool();
+export function getWorkerPool(maxWorkers?: number): WorkerPool {
+    const requestedSize = maxWorkers ?? getDefaultParallelWorkers();
+
+    // If pool exists with different size, terminate and recreate
+    if (poolInstance && poolSize !== requestedSize) {
+        poolInstance.terminate();
+        poolInstance = null;
+        poolSize = null;
     }
+
+    if (!poolInstance) {
+        poolInstance = new WorkerPool(requestedSize);
+        poolSize = requestedSize;
+    }
+
     return poolInstance;
 }
