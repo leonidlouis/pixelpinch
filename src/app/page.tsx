@@ -13,7 +13,9 @@ import {
   isValidImageFile
 } from '@/lib/compression';
 import { getDefaultParallelWorkers } from '@/lib/worker-pool';
+import { sendEvent } from '@/lib/analytics';
 import type { ImageFile, CompressionSettings } from '@/types/compression';
+// ... existing imports ...
 
 function SupportDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -104,8 +106,16 @@ export default function Home() {
 
   // Add new files
   const handleFilesAdded = useCallback((newFiles: File[]) => {
-    const imageFiles: ImageFile[] = newFiles
-      .filter(isValidImageFile)
+    const validFiles = newFiles.filter(isValidImageFile);
+
+    // Track files added
+    sendEvent('files_added', {
+      count: validFiles.length,
+      types: validFiles.map(f => f.type),
+      total_size: validFiles.reduce((acc, f) => acc + f.size, 0)
+    });
+
+    const imageFiles: ImageFile[] = validFiles
       .map(file => ({
         id: generateId(),
         file,
@@ -158,8 +168,27 @@ export default function Home() {
     setIsProcessing(true);
     setLastRunSettings(settings);
 
+    // Track batch start
+    sendEvent('compression_started', {
+      file_count: filesToProcess.length,
+      settings: settings // format, quality, workers
+    });
+
+    const startTime = performance.now();
+
     try {
       await compressFiles(filesToProcess, settings, updateFile);
+
+      // Track batch completion
+      const duration = performance.now() - startTime;
+      const completedFiles = filesToProcess; // compressFiles updates status via callback, but we know the count
+
+      sendEvent('batch_completed', {
+        file_count: completedFiles.length,
+        duration_ms: Math.round(duration),
+        settings: settings
+      });
+
     } finally {
       setIsProcessing(false);
     }

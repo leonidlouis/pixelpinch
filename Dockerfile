@@ -19,7 +19,10 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Environment variables must be present at build time if they affect the build
-# (Add NEXT_PUBLIC_* variables here directly or via args if needed)
+ARG NEXT_PUBLIC_POSTHOG_KEY
+ARG NEXT_PUBLIC_POSTHOG_HOST
+ENV NEXT_PUBLIC_POSTHOG_KEY=$NEXT_PUBLIC_POSTHOG_KEY
+ENV NEXT_PUBLIC_POSTHOG_HOST=$NEXT_PUBLIC_POSTHOG_HOST
 
 RUN npm run build
 
