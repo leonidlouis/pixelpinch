@@ -6,7 +6,7 @@ import { SettingsPanel } from '@/components/settings-panel';
 import { FileList } from '@/components/file-list';
 import { DownloadButton } from '@/components/download-button';
 import { Button } from '@/components/ui/button';
-import { Play, Zap, Heart } from 'lucide-react';
+import { Play, Zap, CoffeeIcon } from 'lucide-react';
 import {
   generateId,
   compressFiles,
@@ -37,8 +37,8 @@ function SupportDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium transition-all text-[11px] uppercase tracking-wider"
       >
-        <Heart className="w-3.5 h-3.5 fill-current" />
-        Support
+        <CoffeeIcon className="w-3.5 h-3.5 fill-current" />
+        buy me a coffee
       </button>
 
       {isOpen && (
@@ -159,13 +159,13 @@ export default function Home() {
   const processingCount = files.filter(f => f.status === 'processing').length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-background via-background to-muted/20 flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border/50">
+      <header className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border/50 supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground flex-shrink-0">
+              <div className="p-2 rounded-xl bg-gradient-to-br from-primary to-primary/70 text-primary-foreground flex-shrink-0 shadow-lg shadow-primary/20">
                 <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="min-w-0">
@@ -184,7 +184,7 @@ export default function Home() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-4 py-6 sm:py-8 space-y-6">
+      <main className="max-w-5xl mx-auto px-4 py-6 sm:py-8 space-y-6 flex-1 w-full">
         {/* Drop Zone */}
         <DropZone
           onFilesAdded={handleFilesAdded}
@@ -193,8 +193,8 @@ export default function Home() {
 
         {/* If we have files, show settings and file list */}
         {files.length > 0 && (
-          <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-            {/* Sidebar: Settings + Actions - appears after files on mobile */}
+          <div className="grid gap-6 lg:grid-cols-[300px_1fr] pb-24 lg:pb-0">
+            {/* Sidebar: Settings + Actions */}
             <div className="space-y-4 order-2 lg:order-1">
               <SettingsPanel
                 settings={settings}
@@ -202,12 +202,12 @@ export default function Home() {
                 disabled={isProcessing}
               />
 
-              {/* Compress Button */}
+              {/* Desktop Compress Button */}
               <Button
                 size="lg"
                 onClick={handleStartCompression}
                 disabled={!pendingCount || isProcessing}
-                className="w-full gap-2"
+                className="w-full gap-2 hidden lg:flex shadow-lg shadow-primary/10"
               >
                 <Play className="w-5 h-5" />
                 {isProcessing
@@ -218,7 +218,7 @@ export default function Home() {
               </Button>
             </div>
 
-            {/* Main: File List - appears first on mobile */}
+            {/* Main: File List */}
             <div className="order-1 lg:order-2">
               <FileList
                 files={files}
@@ -227,12 +227,31 @@ export default function Home() {
                 onRetryFile={handleRetryFile}
               />
             </div>
+
+            {/* Mobile Sticky Compress Bar */}
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t z-40 lg:hidden safe-area-bottom shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+              <div className="max-w-md mx-auto">
+                <Button
+                  size="lg"
+                  onClick={handleStartCompression}
+                  disabled={!pendingCount || isProcessing}
+                  className="w-full gap-2 shadow-xl shadow-primary/20"
+                >
+                  <Play className="w-5 h-5" />
+                  {isProcessing
+                    ? `Processing (${processingCount})...`
+                    : pendingCount > 0
+                      ? `Compress ${pendingCount} file${pendingCount > 1 ? 's' : ''}`
+                      : 'Start Compression'}
+                </Button>
+              </div>
+            </div>
           </div>
         )}
 
         {/* Empty State */}
         {files.length === 0 && (
-          <div className="text-center py-8">
+          <div className="text-center py-8 animate-in fade-in zoom-in-95 duration-500">
             <p className="text-muted-foreground">
               Drop some images above to get started
             </p>
@@ -251,7 +270,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 mt-auto">
+      <footer className="border-t border-border/50 lg:mt-auto">
         <div className="max-w-5xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground space-y-3">
           <p>
             All processing happens in your browser. Your images never leave your device.
