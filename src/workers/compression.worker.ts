@@ -75,21 +75,50 @@ async function initCodecs(baseUrl: string) {
 }
 
 async function decodeImage(data: ArrayBuffer, mimeType: string): Promise<ImageData> {
-    if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
-        return await jpegDecode.default(data);
-    } else if (mimeType === 'image/webp') {
-        return await webpDecode.default(data);
-    } else if (mimeType === 'image/png') {
-        return await pngDecode.default(data);
-    } else {
-        // For other formats (like converted HEIC), try PNG first, then JPEG
-        try {
+    // Try using native browser APIs first (faster + handles orientation)
+    try {
+        const blob = new Blob([data], { type: mimeType });
+        
+        // This is key: 'from-image' respects the EXIF orientation
+        const bitmap = await self.createImageBitmap(blob, { 
+            imageOrientation: 'from-image' 
+        });
+
+        // Use OffscreenCanvas to extract ImageData
+        const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+        const ctx = canvas.getContext('2d');
+        
+        if (!ctx) {
+            throw new Error('Failed to get 2d context from OffscreenCanvas');
+        }
+
+        ctx.drawImage(bitmap, 0, 0);
+        const imageData = ctx.getImageData(0, 0, bitmap.width, bitmap.height);
+        
+        // Clean up
+        bitmap.close();
+        
+        return imageData;
+    } catch (e) {
+        console.warn('[Worker] Native decoding failed, falling back to WASM:', e);
+        
+        // Fallback to WASM decoders
+        if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
+            return await jpegDecode.default(data);
+        } else if (mimeType === 'image/webp') {
+            return await webpDecode.default(data);
+        } else if (mimeType === 'image/png') {
             return await pngDecode.default(data);
-        } catch {
+        } else {
+            // For other formats (like converted HEIC), try PNG first, then JPEG
             try {
-                return await jpegDecode.default(data);
+                return await pngDecode.default(data);
             } catch {
-                throw new Error(`Unsupported image format: ${mimeType}`);
+                try {
+                    return await jpegDecode.default(data);
+                } catch {
+                    throw new Error(`Unsupported image format: ${mimeType}`);
+                }
             }
         }
     }
