@@ -45,7 +45,7 @@ function SupportDropdown() {
             sendEvent('support_menu_opened');
           }
         }}
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium transition-all text-[11px] tracking-wider"
+        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground font-medium transition-all text-xs tracking-wider"
       >
         <CoffeeIcon className="w-3.5 h-3.5 fill-current" />
         buy me a coffee

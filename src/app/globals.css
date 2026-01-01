@@ -134,3 +134,11 @@
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
 }
+
+/* Custom typography utilities */
+@layer utilities {
+  .text-2xs {
+    font-size: 0.625rem;  /* 10px */
+    line-height: 0.875rem; /* 14px */
+  }
+}

@@ -55,7 +55,7 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
     return (
         <Card>
             <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-base">
+                <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                     <Settings2 className="w-4 h-4" />
                     Compression Settings
                 </CardTitle>
