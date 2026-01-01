@@ -130,10 +130,10 @@ async function compressFileWithWorker(
             type: settings.format === 'webp' ? 'image/webp' : 'image/jpeg',
         });
 
-        // Clear original file reference to free memory (keep only what we need)
+        // Keep original file reference for re-compression capability
         const result: ImageFile = {
             id: imageFile.id,
-            file: null as unknown as File, // Release original file to free memory
+            file: imageFile.file, // Preserve for re-compression
             name: `${baseName}${extension}`,
             originalSize: imageFile.originalSize,
             status: 'done',
