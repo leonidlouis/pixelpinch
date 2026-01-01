@@ -12,9 +12,12 @@ type EventName =
     | 'settings_changed'
     | 'help_clicked'
     | 'clear_all_clicked'
-    | 'support_menu_opened';
+    | 'support_menu_opened'
+    | 'preview_opened'
+    | 'preview_toggle_clicked';
 
-type EventProperties = Record<string, any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type EventProperties = { active_user_account?: string | null; } & Record<string, any>;
 
 export const sendEvent = (name: EventName, properties?: EventProperties) => {
     // 1. Send to PostHog

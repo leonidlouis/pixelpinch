@@ -14,7 +14,8 @@ import {
     Trash2,
     Clock,
     Download,
-    RotateCcw
+    RotateCcw,
+    Eye
 } from 'lucide-react';
 import { formatBytes } from '@/lib/compression';
 import { sendEvent } from '@/lib/analytics';
@@ -25,9 +26,10 @@ interface FileListProps {
     onRemoveFile: (id: string) => void;
     onClearAll: () => void;
     onRetryFile?: (file: ImageFile) => void;
+    onPreview?: (file: ImageFile) => void;
 }
 
-export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileListProps) {
+export function FileList({ files, onRemoveFile, onClearAll, onRetryFile, onPreview }: FileListProps) {
 
     // Memoize expensive calculations to avoid recalculating on every render
     const stats = useMemo(() => {
@@ -161,6 +163,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
                                 file={file}
                                 onRemove={onRemoveFile}
                                 onRetry={onRetryFile}
+                                onPreview={onPreview}
                             />
                         ))}
                     </div>
@@ -176,6 +179,7 @@ interface FileItemProps {
     file: ImageFile;
     onRemove: (id: string) => void;
     onRetry?: (file: ImageFile) => void;
+    onPreview?: (file: ImageFile) => void;
 }
 
 // Download individual file
@@ -192,7 +196,7 @@ function downloadFile(file: ImageFile) {
 }
 
 // Memoized FileItem to prevent re-renders when other files change
-const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileItemProps) {
+const FileItem = React.memo(function FileItem({ file, onRemove, onRetry, onPreview }: FileItemProps) {
     return (
         <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/50 hover:bg-muted active:bg-muted/80 transition-colors group min-h-[56px]">
             {/* Status Icon */}
@@ -211,8 +215,11 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                 )}
             </div>
 
-            {/* File Info */}
-            <div className="flex-1 min-w-0">
+            {/* File Info - Clickable for Preview */}
+            <div
+                className={`flex-1 min-w-0 ${onPreview ? 'cursor-pointer' : ''}`}
+                onClick={() => onPreview?.(file)}
+            >
                 <p className="text-sm font-medium truncate" title={file.name}>
                     <span className="sm:hidden">
                         {file.name.length > 25
@@ -258,12 +265,31 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
 
             {/* Action Buttons */}
             <div className="flex items-center gap-1 flex-shrink-0">
+                {/* Preview Button - Explicit action */}
+                {onPreview && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onPreview(file);
+                        }}
+                        aria-label={`Preview ${file.name}`}
+                        className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10 transition-colors"
+                    >
+                        <Eye className="w-4 h-4" />
+                    </Button>
+                )}
+
                 {/* Download button for completed files */}
                 {file.status === 'done' && file.compressedBlob && (
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => downloadFile(file)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            downloadFile(file);
+                        }}
                         aria-label={`Download ${file.name}`}
                         className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10 transition-colors"
                     >
@@ -276,7 +302,10 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => onRetry?.(file)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onRetry?.(file);
+                        }}
                         aria-label={`Retry ${file.name}`}
                         className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10 transition-colors"
                     >
@@ -288,7 +317,10 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => onRemove(file.id)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onRemove(file.id);
+                    }}
                     aria-label={`Remove ${file.name}`}
                     className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors touch-manipulation"
                 >
