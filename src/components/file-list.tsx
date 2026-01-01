@@ -77,10 +77,33 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
     }
 
     return (
-        <Card>
+        <Card className="max-w-full overflow-hidden">
+            <style jsx global>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 10px;
+                    display: block; /* Force display */
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background-color: var(--border);
+                    border-radius: 9999px;
+                    border: 2px solid transparent;
+                    background-clip: content-box;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background-color: var(--muted-foreground);
+                }
+                /* Firefox */
+                .custom-scrollbar {
+                    scrollbar-width: thin;
+                    scrollbar-color: var(--border) transparent;
+                }
+            `}</style>
             <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-base">
+                    <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
                         <FileImage className="w-4 h-4" />
                         Files ({files.length})
                     </CardTitle>
@@ -91,13 +114,14 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
                         className="text-muted-foreground hover:text-destructive"
                     >
                         <Trash2 className="w-4 h-4 mr-1" />
-                        Clear All
+                        <span className="hidden sm:inline">Clear All</span>
+                        <span className="sm:hidden">Clear</span>
                     </Button>
                 </div>
 
                 {/* Overall Progress */}
                 <div className="space-y-2 pt-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex flex-wrap justify-between gap-y-1 text-sm">
                         <span className="text-muted-foreground">
                             {completedCount} of {files.length} complete
                             {processingCount > 0 && ` • ${processingCount} processing`}
@@ -114,7 +138,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
 
                 {/* Summary Stats */}
                 {completedCount > 0 && (
-                    <div className="flex gap-4 text-sm pt-2">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm pt-2">
                         <div>
                             <span className="text-muted-foreground">Original: </span>
                             <span className="font-medium">{formatBytes(totalOriginal)}</span>
@@ -129,7 +153,7 @@ export function FileList({ files, onRemoveFile, onClearAll, onRetryFile }: FileL
 
             <CardContent className="pt-0">
                 <div className="relative group/list">
-                    <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent overscroll-contain">
+                    <div className="max-h-[400px] overflow-y-auto space-y-2 pr-1 custom-scrollbar overscroll-contain">
                         {files.map((file) => (
                             <FileItem
                                 key={file.id}
@@ -169,7 +193,7 @@ function downloadFile(file: ImageFile) {
 // Memoized FileItem to prevent re-renders when other files change
 const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileItemProps) {
     return (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50 hover:bg-muted active:bg-muted/80 transition-colors group min-h-[56px]">
+        <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg bg-muted/50 hover:bg-muted active:bg-muted/80 transition-colors group min-h-[56px]">
             {/* Status Icon */}
             <div className="flex-shrink-0">
                 {file.status === 'pending' && (
@@ -188,7 +212,14 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
 
             {/* File Info */}
             <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{file.name}</p>
+                <p className="text-sm font-medium truncate" title={file.name}>
+                    <span className="sm:hidden">
+                        {file.name.length > 25
+                            ? `${file.name.slice(0, 16)}...${file.name.slice(-7)}`
+                            : file.name}
+                    </span>
+                    <span className="hidden sm:inline">{file.name}</span>
+                </p>
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>{formatBytes(file.originalSize)}</span>
                     {file.status === 'done' && file.compressedSize && (
@@ -198,7 +229,7 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                         </>
                     )}
                     {file.status === 'error' && file.error && (
-                        <span className="text-destructive truncate">{file.error}</span>
+                        <span className="text-destructive truncate max-w-[100px]">{file.error}</span>
                     )}
                 </div>
             </div>
@@ -233,7 +264,7 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                         size="icon"
                         onClick={() => downloadFile(file)}
                         aria-label={`Download ${file.name}`}
-                        className="h-9 w-9 opacity-60 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
+                        className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10 transition-colors"
                     >
                         <Download className="w-4 h-4" />
                     </Button>
@@ -246,7 +277,7 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                         size="icon"
                         onClick={() => onRetry?.(file)}
                         aria-label={`Retry ${file.name}`}
-                        className="h-9 w-9"
+                        className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-foreground hover:bg-muted-foreground/10 transition-colors"
                     >
                         <RotateCcw className="w-4 h-4" />
                     </Button>
@@ -258,7 +289,7 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry }: FileI
                     size="icon"
                     onClick={() => onRemove(file.id)}
                     aria-label={`Remove ${file.name}`}
-                    className="h-9 w-9 opacity-60 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity touch-manipulation"
+                    className="h-8 w-8 sm:h-9 sm:w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors touch-manipulation"
                 >
                     <Trash2 className="w-4 h-4" />
                 </Button>
