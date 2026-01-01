@@ -265,6 +265,10 @@ export async function compressFiles(
         })
     );
 
+    // Terminate workers to free memory (especially important on mobile/older devices)
+    // Workers will be re-created on next compression run
+    pool.terminate();
+
     // Extract values, converting rejected promises to error results
     return results.map((result, index) => {
         if (result.status === 'fulfilled') {
