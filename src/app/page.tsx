@@ -256,7 +256,7 @@ export default function Home() {
             </div>
 
             {/* Mobile Sticky Compress Bar */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-xl border-t z-40 lg:hidden safe-area-bottom shadow-2xl animate-in slide-in-from-bottom-full duration-300">
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 border-t z-40 lg:hidden safe-area-bottom shadow-2xl animate-in slide-in-from-bottom-full duration-300">
               <div className="max-w-md mx-auto">
                 <Button
                   size="lg"
