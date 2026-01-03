@@ -215,6 +215,15 @@ export default function Home() {
     }
   }, [files, settings, updateFile]);
 
+  // Preview a file
+  const handlePreview = useCallback((file: ImageFile) => {
+    setPreviewFileId(file.id);
+    sendEvent('preview_opened', {
+      file_name: file.name,
+      file_size: file.originalSize
+    });
+  }, []);
+
   // Retry a failed file
   const handleRetryFile = useCallback(async (file: ImageFile) => {
     if (file.status !== 'error' || !file.file) return;
@@ -305,13 +314,7 @@ export default function Home() {
                 onRemoveFile={handleRemoveFile}
                 onClearAll={handleClearAll}
                 onRetryFile={handleRetryFile}
-                onPreview={(file) => {
-                  setPreviewFileId(file.id);
-                  sendEvent('preview_opened', {
-                    file_name: file.name,
-                    file_size: file.originalSize
-                  });
-                }}
+                onPreview={handlePreview}
               />
             </div>
 
