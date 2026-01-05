@@ -149,34 +149,48 @@ export function ImagePreview({ file, isOpen, onClose }: ImagePreviewProps) {
                         }}
                     />
 
-                    {/* Preload both images to avoid decode lag on toggle */}
-                    {imageSrc && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imageSrc} alt="" className="hidden" aria-hidden="true" />
-                    )}
-                    {compressedSrc && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={compressedSrc} alt="" className="hidden" aria-hidden="true" />
-                    )}
+                    {/* Stacked images for instant toggle */}
+                    <div className="relative w-full h-full flex items-center justify-center p-4">
+                        {(!imageSrc && !compressedSrc) ? (
+                            <div className="flex flex-col items-center gap-2 text-muted-foreground z-10">
+                                <FileImage className="w-12 h-12 opacity-20" />
+                                <p>Loading preview...</p>
+                            </div>
+                        ) : (
+                            <>
+                                {imageSrc && (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={imageSrc}
+                                        alt="Original"
+                                        className={cn(
+                                            "absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ease-in-out p-4",
+                                            (showCompressed && isCompressedAvailable) ? "opacity-0 z-0" : "opacity-100 z-10"
+                                        )}
+                                    />
+                                )}
+                                {compressedSrc && (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={compressedSrc}
+                                        alt="Compressed"
+                                        className={cn(
+                                            "absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ease-in-out p-4",
+                                            (showCompressed && isCompressedAvailable) ? "opacity-100 z-10" : "opacity-0 z-0"
+                                        )}
+                                    />
+                                )}
+                            </>
+                        )}
 
-                    {currentSrc ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                            src={currentSrc}
-                            alt="Preview"
-                            className="relative z-10 max-w-full max-h-full object-contain shadow-xl rounded-md transition-all duration-300"
-                        />
-                    ) : (
-                        <div className="flex flex-col items-center gap-2 text-muted-foreground z-10">
-                            <FileImage className="w-12 h-12 opacity-20" />
-                            <p>Loading preview...</p>
+                        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+                            <Badge
+                                variant={showCompressed && isCompressedAvailable ? "default" : "secondary"}
+                                className="shadow-lg backdrop-blur-sm transition-all duration-300"
+                            >
+                                {showCompressed && isCompressedAvailable ? 'Compressed' : 'Original'}
+                            </Badge>
                         </div>
-                    )}
-
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20">
-                        <Badge variant={showCompressed && isCompressedAvailable ? "default" : "secondary"} className="shadow-lg backdrop-blur-sm transition-all duration-300">
-                            {showCompressed && isCompressedAvailable ? 'Compressed' : 'Original'}
-                        </Badge>
                     </div>
                 </div>
 
