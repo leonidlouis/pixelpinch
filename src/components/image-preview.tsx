@@ -149,6 +149,16 @@ export function ImagePreview({ file, isOpen, onClose }: ImagePreviewProps) {
                         }}
                     />
 
+                    {/* Preload both images to avoid decode lag on toggle */}
+                    {imageSrc && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imageSrc} alt="" className="hidden" aria-hidden="true" />
+                    )}
+                    {compressedSrc && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={compressedSrc} alt="" className="hidden" aria-hidden="true" />
+                    )}
+
                     {currentSrc ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
