@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Settings2, Info, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react';
@@ -14,7 +14,7 @@ interface SettingsPanelProps {
     disabled?: boolean;
 }
 
-export function SettingsPanel({ settings, onSettingsChange, disabled }: SettingsPanelProps) {
+export const SettingsPanel = React.memo(function SettingsPanel({ settings, onSettingsChange, disabled }: SettingsPanelProps) {
     const [showQualityGuide, setShowQualityGuide] = useState(false);
     const [showWorkersGuide, setShowWorkersGuide] = useState(false);
 
@@ -252,5 +252,4 @@ export function SettingsPanel({ settings, onSettingsChange, disabled }: Settings
             </CardContent>
         </Card>
     );
-}
-
+});
