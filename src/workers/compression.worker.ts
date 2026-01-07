@@ -18,8 +18,9 @@ import * as webpDecode from '@jsquash/webp/decode';
 import * as pngDecode from '@jsquash/png/decode';
 
 // Track initialization state
-let isInitialized = false;
 let wasmBaseUrl = '';
+const initializedCodecs = new Set<string>();
+const pendingInits = new Map<string, Promise<void>>();
 
 // Fetch and compile WASM module
 async function fetchWasm(filename: string): Promise<WebAssembly.Module> {
@@ -33,45 +34,36 @@ async function fetchWasm(filename: string): Promise<WebAssembly.Module> {
     return WebAssembly.compile(buffer);
 }
 
-async function initCodecs(baseUrl: string) {
-    if (isInitialized) return;
+// Lazy load codec helper
+async function ensureCodec(name: string, wasmFile: string, initFn: (module: WebAssembly.Module) => Promise<unknown>) {
+    if (initializedCodecs.has(name)) return;
 
-    wasmBaseUrl = `${baseUrl}/wasm`;
-    console.log('[Worker] Initializing codecs with base URL:', wasmBaseUrl);
+    let initPromise = pendingInits.get(name);
+    if (!initPromise) {
+        initPromise = (async () => {
+            console.log(`[Worker] Initializing ${name}...`);
+            const wasmModule = await fetchWasm(wasmFile);
+            await initFn(wasmModule);
+            initializedCodecs.add(name);
+            console.log(`[Worker] ${name} initialized`);
+        })();
+        pendingInits.set(name, initPromise);
+    }
 
     try {
-        // Pre-fetch all WASM modules in parallel
-        const [
-            mozjpegEncWasm,
-            mozjpegDecWasm,
-            webpEncWasm,
-            webpDecWasm,
-            pngWasm,
-        ] = await Promise.all([
-            fetchWasm('mozjpeg_enc.wasm'),
-            fetchWasm('mozjpeg_dec.wasm'),
-            fetchWasm('webp_enc.wasm'),
-            fetchWasm('webp_dec.wasm'),
-            fetchWasm('squoosh_png_bg.wasm'),
-        ]);
-
-        console.log('[Worker] WASM modules fetched, initializing codecs...');
-
-        // Initialize each codec with the pre-compiled WASM module
-        await Promise.all([
-            jpegEncode.init(mozjpegEncWasm),
-            jpegDecode.init(mozjpegDecWasm),
-            webpEncode.init(webpEncWasm),
-            webpDecode.init(webpDecWasm),
-            pngDecode.init(pngWasm),
-        ]);
-
-        isInitialized = true;
-        console.log('[Worker] All codecs initialized successfully');
-    } catch (error) {
-        console.error('[Worker] Failed to initialize codecs:', error);
-        throw error;
+        await initPromise;
+    } finally {
+        // Only delete from pending if it matches (though with await it should be fine)
+        if (pendingInits.get(name) === initPromise) {
+            pendingInits.delete(name);
+        }
     }
+}
+
+async function initCodecs(baseUrl: string) {
+    wasmBaseUrl = `${baseUrl}/wasm`;
+    console.log('[Worker] Worker initialized with base URL:', wasmBaseUrl);
+    // No eager loading - codecs are loaded on demand
 }
 
 async function decodeImage(data: ArrayBuffer, mimeType: string): Promise<ImageData> {
@@ -104,17 +96,22 @@ async function decodeImage(data: ArrayBuffer, mimeType: string): Promise<ImageDa
         
         // Fallback to WASM decoders
         if (mimeType === 'image/jpeg' || mimeType === 'image/jpg') {
+            await ensureCodec('jpeg_dec', 'mozjpeg_dec.wasm', jpegDecode.init);
             return await jpegDecode.default(data);
         } else if (mimeType === 'image/webp') {
+            await ensureCodec('webp_dec', 'webp_dec.wasm', webpDecode.init);
             return await webpDecode.default(data);
         } else if (mimeType === 'image/png') {
+            await ensureCodec('png_dec', 'squoosh_png_bg.wasm', pngDecode.init);
             return await pngDecode.default(data);
         } else {
             // For other formats (like converted HEIC), try PNG first, then JPEG
             try {
+                await ensureCodec('png_dec', 'squoosh_png_bg.wasm', pngDecode.init);
                 return await pngDecode.default(data);
             } catch {
                 try {
+                    await ensureCodec('jpeg_dec', 'mozjpeg_dec.wasm', jpegDecode.init);
                     return await jpegDecode.default(data);
                 } catch {
                     throw new Error(`Unsupported image format: ${mimeType}`);
@@ -130,8 +127,10 @@ async function encodeImage(
     quality: number
 ): Promise<ArrayBuffer> {
     if (format === 'webp') {
+        await ensureCodec('webp_enc', 'webp_enc.wasm', webpEncode.init);
         return await webpEncode.default(imageData, { quality });
     } else {
+        await ensureCodec('jpeg_enc', 'mozjpeg_enc.wasm', jpegEncode.init);
         return await jpegEncode.default(imageData, { quality });
     }
 }
@@ -187,13 +186,13 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
     }
 
     if (message.type === 'compress') {
-        // Ensure codecs are initialized before compressing
-        if (!isInitialized) {
+        // Check if base URL is set (init was called)
+        if (!wasmBaseUrl) {
             const errorResponse: CompressionResponse = {
                 id: message.payload.id,
                 status: 'error',
                 originalSize: message.payload.imageData.byteLength,
-                error: 'Codecs not initialized. Please refresh the page.',
+                error: 'Worker not initialized. Please refresh the page.',
             };
             self.postMessage({ type: 'result', payload: errorResponse } as WorkerResponse);
             return;
