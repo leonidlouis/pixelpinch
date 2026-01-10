@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, memo } from 'react';
 import { Upload, ImageIcon } from 'lucide-react';
 import { isValidImageFile, SUPPORTED_EXTENSIONS } from '@/lib/compression';
 
@@ -9,7 +9,7 @@ interface DropZoneProps {
     disabled?: boolean;
 }
 
-export function DropZone({ onFilesAdded, disabled }: DropZoneProps) {
+export const DropZone = memo(function DropZone({ onFilesAdded, disabled }: DropZoneProps) {
     const [isDragActive, setIsDragActive] = useState(false);
 
     const handleDragEnter = useCallback((e: React.DragEvent) => {
@@ -121,4 +121,4 @@ export function DropZone({ onFilesAdded, disabled }: DropZoneProps) {
             </div>
         </div>
     );
-}
+});

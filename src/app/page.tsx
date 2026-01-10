@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, memo } from 'react';
 import { DropZone } from '@/components/drop-zone';
 import { SettingsPanel } from '@/components/settings-panel';
 import { FileList } from '@/components/file-list';
@@ -17,7 +17,7 @@ import { sendEvent } from '@/lib/analytics';
 import type { ImageFile, CompressionSettings } from '@/types/compression';
 // ... existing imports ...
 
-function SupportDropdown() {
+const SupportDropdown = memo(function SupportDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -95,7 +95,7 @@ function SupportDropdown() {
       )}
     </div>
   );
-}
+});
 
 import { ImagePreview } from '@/components/image-preview';
 
