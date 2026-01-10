@@ -10,7 +10,7 @@
   - Number of threads/workers users set
   - User's client-side performance metrics
   - User's interaction with the footer (clicking the https://bylouis.io website, clicking "buy me a coffee" button)
-  - Note: These are so that I can improve the app and provide better user experience. (+ im curious how many people clicks my footer links!)
+  - Note: These are so that I can improve the app and provide better user experience. (+ im curious how many people clicks my footer links.)
 - I CANNOT SEE:
   - Image name
   - Image content (both original and compressed)

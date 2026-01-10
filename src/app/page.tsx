@@ -359,20 +359,27 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className={`border-t border-border/50 lg:mt-auto lg:pb-0 ${files.length > 0 ? 'pb-24' : 'pb-4'}`}>
-        <div className="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-muted-foreground space-y-3">
-          <p className="flex items-center justify-center gap-2">
-            processing happens locally on-device, zero uploads.
-            <span className="text-border opacity-50">•</span>
-            <a href="https://github.com/leonidlouis/pixelpinch/blob/main/PRIVACYPOLICY.md" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'privacy_policy' })}>privacy policy</a>
-          </p>
-          <div className="flex items-center justify-center gap-2 text-xs">
-            <span>made <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
-            <span className="text-border">•</span>
-            <span>any issues? <a href="mailto:louisleonid325@gmail.com?subject=[PIXELPINCH ISSUE] X is not working" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'email' })}>mail me</a></span>
-            <span className="text-border">•</span>
-            <SupportDropdown />
+      <footer className={`border-t border-border/60 lg:mt-auto lg:pb-0 ${files.length > 0 ? 'pb-24' : 'pb-4'}`}>
+        <div className="flex flex-col items-center gap-5 pt-6">
+          {/* Privacy Badge */}
+          <div className="flex items-center gap-2 px-3 py-1.5 text-muted-foreground text-xs font-medium">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <span>100% local processing — nothing leaves your device</span>
           </div>
+
+           {/* Links */}
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
+            <span>made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline decoration-border/50 underline-offset-4 hover:decoration-foreground/70 text-foreground/70 hover:text-foreground transition-all" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
+            <span className="text-border/50">|</span>
+            <a href="https://github.com/leonidlouis/pixelpinch/blob/main/PRIVACYPOLICY.md" target="_blank" rel="noopener noreferrer" className="underline decoration-border/50 underline-offset-4 hover:decoration-foreground/70 text-foreground/70 hover:text-foreground transition-all" onClick={() => sendEvent('support_clicked', { platform: 'privacy_policy' })}>Privacy Policy</a>
+            <span className="text-border/50">|</span>
+            <a href="https://github.com/leonidlouis/pixelpinch" target="_blank" rel="noopener noreferrer" className="underline decoration-border/50 underline-offset-4 hover:decoration-foreground/70 text-foreground/70 hover:text-foreground transition-all" onClick={() => sendEvent('support_clicked', { platform: 'source_code' })}>Source Code</a>
+            <span className="text-border/50">|</span>
+            <a href="mailto:louisleonid325@gmail.com?subject=[PIXELPINCH ISSUE]" className="underline decoration-border/50 underline-offset-4 hover:decoration-foreground/70 text-foreground/70 hover:text-foreground transition-all" onClick={() => sendEvent('support_clicked', { platform: 'email' })}>Issues?</a>
+          </div>
+
+          {/* Support */}
+          <SupportDropdown />
         </div>
       </footer>
 
