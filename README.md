@@ -8,7 +8,7 @@
 
 ## ✨ Features
 
-- **🔒 100% Private** — Zero server uploads. All processing happens in your browser.
+- **🔒 No Uploads** — Zero server uploads. All processing happens in your browser.
 - **⚡ Blazing Fast** — Parallel compression via Web Workers (uses all CPU cores).
 - **📦 Batch Processing** — No arbitrary limits. Compress as many images as your device can handle.
 - **🔄 Re-compress** — Tweak settings and re-process without re-uploading.
@@ -20,84 +20,6 @@
 | Input | Output |
 |-------|--------|
 | JPEG, PNG, WebP, HEIC/HEIF | JPEG, WebP |
-
----
-
-## 🏗️ Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                        BROWSER (Client)                         │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐  │
-│  │   Drop Zone  │───▶│  File State  │───▶│  Settings Panel  │  │
-│  │  (Upload UI) │    │   (React)    │    │  (Quality/Format)│  │
-│  └──────────────┘    └──────┬───────┘    └────────┬─────────┘  │
-│                             │                     │             │
-│                             ▼                     │             │
-│                   ┌─────────────────┐             │             │
-│                   │   Compression   │◀────────────┘             │
-│                   │  Orchestrator   │                           │
-│                   │  (Main Thread)  │                           │
-│                   └────────┬────────┘                           │
-│                            │                                    │
-│         ┌──────────────────┼──────────────────┐                 │
-│         ▼                  ▼                  ▼                 │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────┐         │
-│  │  Worker #1  │    │  Worker #2  │    │  Worker #N  │         │
-│  │   (WASM)    │    │   (WASM)    │    │   (WASM)    │         │
-│  └─────────────┘    └─────────────┘    └─────────────┘         │
-│        │                  │                  │                  │
-│        └──────────────────┴──────────────────┘                  │
-│                            │                                    │
-│                            ▼                                    │
-│                   ┌─────────────────┐                           │
-│                   │  Compressed     │                           │
-│                   │  Blob / ZIP     │──▶ Download               │
-│                   └─────────────────┘                           │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## 📂 Project Structure
-
-```
-src/
-├── app/                       # Next.js App Router
-│   ├── page.tsx               # Main page component
-│   ├── layout.tsx             # Root layout with metadata
-│   ├── globals.css            # Tailwind styles
-│   ├── icon.png               # Favicon
-│   ├── apple-icon.png         # Apple touch icon
-│   ├── opengraph-image.png    # OG image for social sharing
-│   └── twitter-image.png      # Twitter card image
-│
-├── components/
-│   ├── drop-zone.tsx          # Drag & drop file upload
-│   ├── file-list.tsx          # File list with progress + individual rows
-│   ├── settings-panel.tsx     # Quality slider + format toggle
-│   ├── download-button.tsx    # Single/ZIP download logic
-│   └── ui/                    # Radix-based UI primitives
-│       ├── badge.tsx
-│       ├── button.tsx
-│       ├── card.tsx
-│       ├── progress.tsx
-│       └── slider.tsx
-│
-├── lib/
-│   ├── compression.ts         # Orchestrates compression flow
-│   ├── worker-pool.ts         # Manages Web Worker concurrency
-│   └── utils.ts               # Tailwind merge utility
-│
-├── workers/
-│   └── compression.worker.ts  # WASM compression worker
-│
-└── types/
-    └── compression.ts         # TypeScript interfaces
-```
 
 ---
 
@@ -120,6 +42,7 @@ src/
                 ┌───────────────────────┐
                 │  User Adjusts Settings│
                 │  (Quality 1-100%)     │
+                │  (Threads 1-N)        │
                 │  (Format: JPEG/WebP)  │
                 └───────────┬───────────┘
                             │
@@ -179,12 +102,11 @@ src/
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Run this yourself!
 
 ### Prerequisites
 
-- Node.js 20+
-- npm 9+
+- a reasonably recent version of NPM and Node
 
 ### Installation
 
@@ -233,19 +155,27 @@ docker run -p 3000:3000 pixelpinch
 | `npm run build` | Production build |
 | `npm run build:worker` | Bundle compression worker |
 | `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
 | `npm run copy-wasm` | Copy WASM files to public/ |
 
 ---
 
-## 🔒 Privacy
+## 🔒 Privacy Policy & Details
 
-**PixelPinch is 100% client-side.**
+**PixelPinch's Image Compression is 100% client-side.**
 
-- No images are uploaded to any server
-- No analytics or tracking
-- No cookies
+- NO images are uploaded to any server
 - Works offline after initial load
+- Pixelpinch tracks the user interaction and usage using Posthog's Analytics & Session Replay, these are the things that we know:
+  - Number of images
+  - Size of images
+  - Number of threads/workers users set
+  - User's client-side performance metrics
+  - User's interaction with the footer (clicking the https://bylouis.io website, clicking "buy me a coffee" button)
+  - Note: These are so that I can improve the app and provide better user experience. (+ im curious how many people clicks my footer links!)
+- I CANNOT SEE:
+  - Image name
+  - Image content (both original and compressed)
+- I DO NOT TRACK any personal information!
 
 ---
 

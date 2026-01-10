@@ -1,7 +1,6 @@
 {
   "name": "pixelpinch.app",
   "version": "0.1.0",
-  "private": true,
   "scripts": {
     "dev": "next dev --turbo",
     "dev:worker": "node scripts/build-worker.mjs --watch",

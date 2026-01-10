@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "PixelPinch - Free Batch Image Compression",
-  description: "Instantly compress all your images at once, entirely in your browser. No uploads, no servers, no limits. Supports WebP, JPEG, PNG, and HEIC. 100% private.",
+  description: "Instantly compress all your images at once, entirely in your browser. No uploads, no limits, private. Supports WebP, JPEG, PNG, and HEIC.",
   keywords: ["image compression", "batch compress", "webp", "jpeg", "png", "heic", "browser", "privacy", "free", "online", "fast", "instant"],
 
   // Canonical URL
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
   // Open Graph
   openGraph: {
     title: 'PixelPinch - Free Batch Image Compression',
-    description: 'Instantly compress all your images in your browser. No uploads, no limits, 100% private.',
+    description: 'Instantly compress all your images in your browser. No uploads, no limits, private.',
     url: 'https://pixelpinch.app',
     siteName: 'PixelPinch',
     locale: 'en_US',
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'PixelPinch - Free Batch Image Compression',
-    description: 'Instantly compress all your images in your browser. No limits, 100% private.',
+    description: 'Instantly compress all your images in your browser. No limits, private.',
     images: ['/og-image.png'],
   },
 

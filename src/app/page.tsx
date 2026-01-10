@@ -345,7 +345,7 @@ export default function Home() {
         {files.length === 0 && (
           <div className="text-center py-8 animate-in fade-in zoom-in-95 duration-500">
             <div className="mt-4 flex flex-wrap justify-center gap-2">
-              {['lightning fast', 'no limits', '100% private'].map((feature) => (
+              {['lightning fast', 'no limits', 'private'].map((feature) => (
                 <span
                   key={feature}
                   className="px-3 py-1 rounded-full bg-muted text-xs font-medium"
@@ -361,8 +361,10 @@ export default function Home() {
       {/* Footer */}
       <footer className={`border-t border-border/50 lg:mt-auto lg:pb-0 ${files.length > 0 ? 'pb-24' : 'pb-4'}`}>
         <div className="max-w-5xl mx-auto px-4 py-6 text-center text-xs text-muted-foreground space-y-3">
-          <p>
+          <p className="flex items-center justify-center gap-2">
             processing happens locally on-device, zero uploads.
+            <span className="text-border opacity-50">•</span>
+            <a href="https://github.com/leonidlouis/pixelpinch/blob/main/PRIVACYPOLICY.md" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'privacy_policy' })}>privacy policy</a>
           </p>
           <div className="flex items-center justify-center gap-2 text-xs">
             <span>made <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
