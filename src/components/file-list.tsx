@@ -220,7 +220,7 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry, onPrevi
                 className={`flex-1 min-w-0 ${onPreview ? 'cursor-pointer' : ''}`}
                 onClick={() => onPreview?.(file)}
             >
-                <p className="text-sm font-medium truncate" title={file.name}>
+                <p className="text-sm font-medium truncate ph-no-capture" title={file.name}>
                     <span className="sm:hidden">
                         {file.name.length > 25
                             ? `${file.name.slice(0, 16)}...${file.name.slice(-7)}`
