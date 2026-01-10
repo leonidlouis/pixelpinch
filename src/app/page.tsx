@@ -359,7 +359,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className={`border-t border-border/60 lg:mt-auto lg:pb-0 ${files.length > 0 ? 'pb-24' : 'pb-4'}`}>
+      <footer className={`border-t border-border/60 lg:mt-auto ${files.length > 0 ? 'pb-24 lg:pb-6' : 'pb-4 lg:pb-6'}`}>
         <div className="flex flex-col items-center gap-5 pt-6">
           {/* Privacy Badge */}
           <div className="flex items-center gap-2 px-3 py-1.5 text-muted-foreground text-xs font-medium">
@@ -379,7 +379,9 @@ export default function Home() {
           </div>
 
           {/* Support */}
-          <SupportDropdown />
+          <div className="lg:pb-6">
+            <SupportDropdown />
+          </div>
         </div>
       </footer>
 
