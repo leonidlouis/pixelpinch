@@ -94,7 +94,11 @@ export function DownloadButton({ files, disabled }: DownloadButtonProps) {
             ) : (
                 <>
                     <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                    <span>{hasFiles ? 'Download' : 'No files'}</span>
+                    {hasFiles ? (
+                        <span>Download</span>
+                    ) : (
+                        <span className="hidden sm:inline">No files</span>
+                    )}
                 </>
             )}
         </Button>
