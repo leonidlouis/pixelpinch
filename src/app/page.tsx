@@ -364,10 +364,10 @@ export default function Home() {
           {/* Privacy Badge */}
           <div className="flex items-center gap-2 px-3 py-1.5 text-muted-foreground text-xs font-medium">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span>100% local processing — nothing leaves your device</span>
+            <span>100% processing done on your device, no uploads</span>
           </div>
 
-           {/* Links */}
+          {/* Links */}
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
             <span>made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline decoration-border/50 underline-offset-4 hover:decoration-foreground/70 text-foreground/70 hover:text-foreground transition-all" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
             <span className="text-border/50">|</span>
