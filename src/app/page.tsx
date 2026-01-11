@@ -369,7 +369,7 @@ export default function Home() {
 
           {/* Links */}
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-            <span>made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline decoration-border/50 underline-offset-4 hover:decoration-foreground/70 text-foreground/70 hover:text-foreground transition-all" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
+            <span>made by <a href="https://bylouis.io" target="_blank" rel="noopener noreferrer" className="underline decoration-border/50 underline-offset-4 hover:decoration-foreground/70 text-foreground/70 hover:text-foreground transition-all font-semibold" onClick={() => sendEvent('support_clicked', { platform: 'portfolio' })}>bylouis.io</a></span>
             <span className="text-border/50">|</span>
             <a href="https://github.com/leonidlouis/pixelpinch/blob/main/PRIVACYPOLICY.md" target="_blank" rel="noopener noreferrer" className="underline decoration-border/50 underline-offset-4 hover:decoration-foreground/70 text-foreground/70 hover:text-foreground transition-all" onClick={() => sendEvent('support_clicked', { platform: 'privacy_policy' })}>Privacy Policy</a>
             <span className="text-border/50">|</span>
