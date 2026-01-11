@@ -253,13 +253,13 @@ const FileItem = React.memo(function FileItem({ file, onRemove, onRetry, onPrevi
                     </Badge>
                 )}
                 {file.status === 'processing' && (
-                    <Badge variant="outline">Processing</Badge>
+                    <Badge variant="outline" className="hidden sm:inline-flex">Processing</Badge>
                 )}
                 {file.status === 'pending' && (
-                    <Badge variant="secondary" className="bg-muted-foreground/10 hover:bg-muted-foreground/20 text-muted-foreground">Ready</Badge>
+                    <Badge variant="secondary" className="hidden sm:inline-flex bg-muted-foreground/10 hover:bg-muted-foreground/20 text-muted-foreground">Ready</Badge>
                 )}
                 {file.status === 'error' && (
-                    <Badge variant="destructive">Failed</Badge>
+                    <Badge variant="destructive" className="hidden sm:inline-flex">Failed</Badge>
                 )}
             </div>
 
